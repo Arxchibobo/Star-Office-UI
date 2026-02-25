@@ -36,3 +36,4 @@ skills/
 # Demo content
 demo-video/
 .github-token
+github-push.sh

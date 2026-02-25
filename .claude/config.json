@@ -1,0 +1,30 @@
+{
+  "name": "OpenClaw Workspace with Claude Reconstruction",
+  "version": "1.0",
+  "description": "集成claude-Reconstruction的5层工程化配置",
+  "contextFiles": [
+    "claude-Reconstruction/CLAUDE.md",
+    "claude-Reconstruction/CONTEXT_MANAGER.md",
+    "claude-Reconstruction/KNOWLEDGE_MAP.md"
+  ],
+  "rules": {
+    "core": [
+      "claude-Reconstruction/rules/core/work-mode.md",
+      "claude-Reconstruction/rules/core/blocking-rules.md",
+      "claude-Reconstruction/rules/core/capability-evolution.md"
+    ],
+    "domain": [
+      "claude-Reconstruction/rules/domain/coding.md",
+      "claude-Reconstruction/rules/domain/testing.md",
+      "claude-Reconstruction/rules/domain/git.md",
+      "claude-Reconstruction/rules/domain/security.md"
+    ]
+  },
+  "capabilities": [
+    "claude-Reconstruction/capabilities/file-management.md",
+    "claude-Reconstruction/capabilities/project-analysis.md"
+  ],
+  "workingDirectory": "~/.openclaw/workspace",
+  "autoLoadRules": true,
+  "workMode": "engineering"
+}

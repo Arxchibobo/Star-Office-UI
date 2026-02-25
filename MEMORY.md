@@ -286,3 +286,44 @@ Execution: Claude Code/Codex Agents
   git push https://${GITHUB_TOKEN}@github.com/Arxchibobo/openclaw-arxchibo.git main
   ```
 - **注意：** Token已安全保存，不要忘记！推送前先source该文件加载token。
+
+## Claude Code 配置（2026-02-26）
+
+### 集成 claude-Reconstruction v5.2
+- **配置位置：** `.claude/config.json`
+- **规则库：** `claude-Reconstruction/`
+- **启动脚本：** `start-claude-code.sh`
+
+### 工作模式（4步）
+1. 规划：收到任务后生成TodoList
+2. 确认：展示计划，等待用户确认
+3. 执行：执行到底，不问问题
+4. 验收：总结成果，完成交付
+
+### 智能加载系统
+根据任务类型自动加载对应规则：
+- **api** → API设计、安全、RESTful规范
+- **frontend** → UI规范、性能优化、响应式
+- **testing** → 测试策略、覆盖率要求
+- **security** → 安全审查、加密标准
+- **coding** → 代码规范、Git规范、重构
+
+### 使用方法
+```bash
+# 启动Claude Code（指定任务类型）
+./start-claude-code.sh api
+
+# 或直接使用配置
+cd ~/.openclaw/workspace
+claude --config .claude/config.json
+```
+
+### 核心规则
+1. **只在4种情况提问：** 缺凭证、多方案、需求矛盾、高风险
+2. **其他自行决策：** 文件命名、代码风格、依赖版本等
+3. **能力进化：** 每次对话自动识别可复用模式并内生化
+
+### 文档位置
+- 主配置：`.claude/README.md`
+- 完整规则：`claude-Reconstruction/README.md`
+- 快速开始：`claude-Reconstruction/QUICK_START.md`
