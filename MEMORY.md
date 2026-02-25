@@ -157,12 +157,15 @@ Execution: Claude Code/Codex Agents
 
 ### Git 仓库
 - **位置:** ~/.openclaw/workspace
-- **状态:** 本地仓库，已提交3个 Agent Swarm commits
-- **远程:** 未配置（需要时可以 push 到 GitHub）
+- **状态:** 已推送到 GitHub
+- **远程仓库:** https://github.com/Arxchibobo/openclaw-arxchibo.git
+- **分支:** master
 - **最新提交:**
-  1. `d225470` - Add complete system overview documentation
-  2. `9d1a88d` - Integrate Agent Swarm with Claude Reconstruction
-  3. `42a2811` - Add complete Agent Swarm system prototype
+  1. `48b13ee` - Add .gitignore and claude-Reconstruction config
+  2. `08f2d59` - Update MEMORY.md with decision tree and knowledge graph
+  3. `d225470` - Add complete system overview documentation
+  4. `9d1a88d` - Integrate Agent Swarm with Claude Reconstruction
+  5. `42a2811` - Add complete Agent Swarm system prototype
 
 ### 系统就绪状态
 - ✅ Agent Swarm 系统完整安装
