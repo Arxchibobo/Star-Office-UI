@@ -270,3 +270,19 @@ Execution: Claude Code/Codex Agents
 3. **轮询优化：** 短timeout（5秒）+ 短sleep（0.1秒）= 快速响应
 4. **日志问题：** Python缓冲导致日志不实时，需要 `-u` 参数
 5. **启动脚本：** 单引号内变量不展开，需用双引号
+
+## GitHub 配置（重要！）
+
+- **仓库地址：** https://github.com/Arxchibobo/openclaw-arxchibo
+
+## GitHub 配置（重要！）
+
+- **仓库地址：** https://github.com/Arxchibobo/openclaw-arxchibo
+- **Token保存位置：** `~/.openclaw/workspace/.github-token`（本地文件，不提交到git）
+- **推送方法：**
+  ```bash
+  cd ~/.openclaw/workspace
+  source .github-token
+  git push https://${GITHUB_TOKEN}@github.com/Arxchibobo/openclaw-arxchibo.git main
+  ```
+- **注意：** Token已安全保存，不要忘记！推送前先source该文件加载token。
