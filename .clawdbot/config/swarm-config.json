@@ -1,0 +1,42 @@
+{
+  "system": {
+    "maxConcurrentAgents": 3,
+    "maxRetries": 3,
+    "checkIntervalMinutes": 10,
+    "workspaceRoot": "/home/arxchibo/.openclaw/workspace",
+    "worktreeRoot": "/home/arxchibo/.openclaw/worktrees",
+    "logDir": "/home/arxchibo/.openclaw/workspace/.clawdbot/logs"
+  },
+  "agents": {
+    "codex": {
+      "model": "gpt-5.1-codex",
+      "reasoning": "high",
+      "useCases": ["backend", "complex_bug", "multi_file_refactor", "reasoning_heavy"]
+    },
+    "claude": {
+      "model": "claude-sonnet-4.5",
+      "useCases": ["frontend", "git_ops", "quick_fix", "fast_iteration"]
+    },
+    "gemini": {
+      "model": "gemini-2.5-pro",
+      "useCases": ["ui_design", "code_review", "documentation"]
+    }
+  },
+  "definitionOfDone": {
+    "prCreated": true,
+    "branchSynced": true,
+    "ciPassed": true,
+    "codeReviewPassed": true,
+    "screenshotsIncluded": "if_ui_changes"
+  },
+  "notifications": {
+    "telegram": true,
+    "onlyNotifyWhenReady": true
+  },
+  "codeReview": {
+    "enabled": true,
+    "reviewers": ["gemini", "codex"],
+    "requireAllPass": false,
+    "criticalOnly": true
+  }
+}

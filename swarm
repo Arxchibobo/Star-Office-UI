@@ -1,0 +1,181 @@
+#!/bin/bash
+# swarm - Agent Swarm 系统主入口
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CLAWDBOT_ROOT="$SCRIPT_DIR/.clawdbot"
+
+# 确保脚本可执行
+chmod +x "$CLAWDBOT_ROOT/scripts"/*.sh 2>/dev/null
+
+show_banner() {
+    cat <<'EOF'
+╔═══════════════════════════════════════════════════════╗
+║           🤖 Agent Swarm System v1.0                 ║
+║     OpenClaw + Codex/Claude Agent Orchestration      ║
+╚═══════════════════════════════════════════════════════╝
+EOF
+}
+
+cmd_spawn() {
+    echo "=== Spawn New Agent ==="
+    echo ""
+    
+    # 交互式输入
+    read -p "Task ID (e.g., feat-billing): " task_id
+    read -p "Agent type (codex/claude/gemini): " agent_type
+    read -p "Description: " description
+    read -p "Prompt file (optional, press Enter to skip): " prompt_file
+    
+    # 验证输入
+    if [ -z "$task_id" ] || [ -z "$agent_type" ] || [ -z "$description" ]; then
+        echo "Error: All fields are required (except prompt file)"
+        exit 1
+    fi
+    
+    # 如果没有 prompt file，让用户输入 prompt
+    if [ -z "$prompt_file" ]; then
+        echo ""
+        echo "Enter your prompt (press Ctrl+D when done):"
+        echo "---"
+        prompt_file="$CLAWDBOT_ROOT/.prompt-$task_id.txt"
+        cat > "$prompt_file"
+        echo "---"
+    fi
+    
+    # 生成 agent
+    "$CLAWDBOT_ROOT/scripts/spawn-agent.sh" "$task_id" "$agent_type" "$description" "$prompt_file"
+    
+    echo ""
+    echo "Agent spawned! Use 'swarm status' to check progress."
+}
+
+cmd_status() {
+    "$CLAWDBOT_ROOT/scripts/task-manager.sh" list
+}
+
+cmd_logs() {
+    "$CLAWDBOT_ROOT/scripts/task-manager.sh" logs "$@"
+}
+
+cmd_attach() {
+    "$CLAWDBOT_ROOT/scripts/task-manager.sh" attach "$@"
+}
+
+cmd_steer() {
+    "$CLAWDBOT_ROOT/scripts/task-manager.sh" steer "$@"
+}
+
+cmd_check() {
+    echo "Running monitor check..."
+    "$CLAWDBOT_ROOT/scripts/check-agents.sh"
+}
+
+cmd_kill() {
+    "$CLAWDBOT_ROOT/scripts/task-manager.sh" kill "$@"
+}
+
+cmd_cleanup() {
+    "$CLAWDBOT_ROOT/scripts/task-manager.sh" cleanup
+}
+
+cmd_config() {
+    local config_file="$CLAWDBOT_ROOT/config/swarm-config.json"
+    
+    if command -v jq &> /dev/null; then
+        echo "Current configuration:"
+        jq '.' "$config_file"
+    else
+        cat "$config_file"
+    fi
+    
+    echo ""
+    echo "Config file: $config_file"
+    echo "Edit with: nano $config_file"
+}
+
+cmd_install_cron() {
+    echo "Installing cron job for agent monitoring..."
+    
+    local check_script="$CLAWDBOT_ROOT/scripts/check-agents.sh"
+    local cron_line="*/10 * * * * $check_script >> $CLAWDBOT_ROOT/logs/cron.log 2>&1"
+    
+    # 检查是否已存在
+    if crontab -l 2>/dev/null | grep -q "check-agents.sh"; then
+        echo "Cron job already exists!"
+        return
+    fi
+    
+    # 添加 cron job
+    (crontab -l 2>/dev/null; echo "$cron_line") | crontab -
+    
+    echo "✓ Cron job installed: runs every 10 minutes"
+    echo "To view cron logs: tail -f $CLAWDBOT_ROOT/logs/cron.log"
+}
+
+cmd_uninstall_cron() {
+    echo "Removing cron job..."
+    crontab -l 2>/dev/null | grep -v "check-agents.sh" | crontab -
+    echo "✓ Cron job removed"
+}
+
+cmd_help() {
+    show_banner
+    cat <<EOF
+
+Usage: swarm <command> [arguments]
+
+🚀 Core Commands:
+  spawn               Spawn a new agent (interactive)
+  status              List all active tasks
+  check               Run monitor check manually
+  
+📊 Task Management:
+  logs <task-id>      View task logs
+  attach <task-id>    Attach to agent's tmux session
+  steer <task-id> <msg>  Send steering message to agent
+  kill <task-id>      Kill a running task
+  cleanup             Clean up completed tasks
+  
+⚙️  Configuration:
+  config              View/edit configuration
+  install-cron        Install monitoring cron job (every 10 min)
+  uninstall-cron      Remove monitoring cron job
+  
+📚 Help:
+  help                Show this help message
+
+Examples:
+  swarm spawn                       # Start a new agent (interactive)
+  swarm status                      # Check all tasks
+  swarm logs feat-billing           # View logs
+  swarm steer feat-billing "Stop. Focus on API first."
+  swarm attach feat-billing         # Attach to tmux session
+  swarm install-cron                # Enable automatic monitoring
+
+For more info: https://docs.openclaw.ai
+EOF
+}
+
+# 主命令分发
+COMMAND="${1:-help}"
+shift || true
+
+case "$COMMAND" in
+    spawn)          cmd_spawn "$@" ;;
+    status)         cmd_status "$@" ;;
+    logs)           cmd_logs "$@" ;;
+    attach)         cmd_attach "$@" ;;
+    steer)          cmd_steer "$@" ;;
+    check)          cmd_check "$@" ;;
+    kill)           cmd_kill "$@" ;;
+    cleanup)        cmd_cleanup "$@" ;;
+    config)         cmd_config "$@" ;;
+    install-cron)   cmd_install_cron "$@" ;;
+    uninstall-cron) cmd_uninstall_cron "$@" ;;
+    help|--help|-h) cmd_help ;;
+    *)
+        echo "Unknown command: $COMMAND"
+        echo "Run 'swarm help' for usage"
+        exit 1
+        ;;
+esac
