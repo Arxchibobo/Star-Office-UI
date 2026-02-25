@@ -1,0 +1,49 @@
+{
+  "claudeReconstruction": {
+    "enabled": true,
+    "path": "/home/arxchibo/.openclaw/workspace/claude-Reconstruction",
+    "autoDetect": true,
+    "configFile": "CLAUDE.md",
+    "features": {
+      "contextManager": true,
+      "workflowEngine": true,
+      "rulesEngine": true,
+      "hookLayer": true,
+      "delegation": true
+    }
+  },
+  "agentDefaults": {
+    "useEngineering": true,
+    "contextBudget": "20%",
+    "workflowMode": "plan-confirm-execute-deliver",
+    "qualityGates": true,
+    "autoLoadRules": true
+  },
+  "promptTemplates": {
+    "engineering": ".clawdbot/templates/engineering.md",
+    "standard": ".clawdbot/templates/standard.md",
+    "security": ".clawdbot/templates/security.md",
+    "testing": ".clawdbot/templates/testing.md"
+  },
+  "contextKeywords": {
+    "browser-automation": ["playwright", "puppeteer", "selenium", "browser", "e2e"],
+    "api-development": ["api", "rest", "graphql", "endpoint", "route"],
+    "testing": ["test", "jest", "vitest", "mocha", "spec"],
+    "security": ["auth", "authentication", "jwt", "oauth", "security"],
+    "database": ["database", "sql", "mongodb", "prisma", "migration"],
+    "frontend": ["react", "vue", "angular", "component", "ui"]
+  },
+  "rulesLoading": {
+    "alwaysLoad": [
+      "rules/core/work-mode.md",
+      "rules/core/blocking-rules.md",
+      "rules/core/immutability.md"
+    ],
+    "conditionalLoad": {
+      "coding": "rules/domain/coding.md",
+      "testing": "rules/domain/testing.md",
+      "security": "rules/domain/security.md",
+      "git": "rules/domain/git.md"
+    }
+  }
+}

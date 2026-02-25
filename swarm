@@ -49,6 +49,102 @@ cmd_spawn() {
     echo "Agent spawned! Use 'swarm status' to check progress."
 }
 
+cmd_spawn_eng() {
+    "$CLAWDBOT_ROOT/scripts/spawn-with-config.sh" "$@"
+}
+
+cmd_setup_integration() {
+    echo "=== Setting up Claude Reconstruction Integration ==="
+    echo ""
+    
+    local claude_recon_path="$SCRIPT_DIR/claude-Reconstruction"
+    
+    # Check if already exists
+    if [ -d "$claude_recon_path" ]; then
+        echo "✓ Claude Reconstruction already installed at: $claude_recon_path"
+    else
+        echo "Claude Reconstruction not found. Would you like to clone it?"
+        read -p "Clone from GitHub? (y/n) " -n 1 -r
+        echo ""
+        
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            echo "Cloning Claude Reconstruction..."
+            git clone https://github.com/Arxchibobo/claude-Reconstruction.git "$claude_recon_path"
+            echo "✓ Cloned successfully"
+        else
+            echo "Skipped. You can clone it manually later:"
+            echo "  cd ~/.openclaw/workspace"
+            echo "  git clone https://github.com/Arxchibobo/claude-Reconstruction.git"
+            return
+        fi
+    fi
+    
+    # Install dependencies
+    if [ -f "$claude_recon_path/package.json" ]; then
+        echo ""
+        echo "Installing dependencies..."
+        cd "$claude_recon_path"
+        
+        if command -v pnpm &> /dev/null; then
+            pnpm install && pnpm install:config
+        elif command -v npm &> /dev/null; then
+            npm install && npm run install:config
+        else
+            echo "⚠ npm/pnpm not found. Please install dependencies manually."
+        fi
+        
+        cd "$SCRIPT_DIR"
+    fi
+    
+    echo ""
+    echo "✓ Integration setup complete!"
+    echo ""
+    echo "Next steps:"
+    echo "  1. Read integration docs: cat .clawdbot/INTEGRATION.md"
+    echo "  2. Spawn engineering agent: swarm spawn-eng"
+    echo ""
+}
+
+cmd_integration_status() {
+    echo "=== Integration Status ==="
+    echo ""
+    
+    local integration_config="$CLAWDBOT_ROOT/config/integration.json"
+    local claude_recon_path="$SCRIPT_DIR/claude-Reconstruction"
+    
+    # Check config
+    if [ -f "$integration_config" ]; then
+        echo "✓ Integration config exists"
+        local enabled=$(jq -r '.claudeReconstruction.enabled' "$integration_config")
+        echo "  Enabled: $enabled"
+    else
+        echo "✗ Integration config not found"
+    fi
+    
+    # Check Claude Reconstruction
+    if [ -d "$claude_recon_path" ]; then
+        echo "✓ Claude Reconstruction installed"
+        echo "  Path: $claude_recon_path"
+        
+        if [ -f "$claude_recon_path/CLAUDE.md" ]; then
+            echo "  Config: ✓ CLAUDE.md found"
+        fi
+    else
+        echo "✗ Claude Reconstruction not installed"
+        echo "  Run: swarm setup-integration"
+    fi
+    
+    # Check Claude CLI
+    if command -v claude &> /dev/null; then
+        echo "✓ Claude CLI installed"
+        echo "  Version: $(claude --version 2>&1)"
+    else
+        echo "✗ Claude CLI not installed"
+    fi
+    
+    echo ""
+}
+
 cmd_status() {
     "$CLAWDBOT_ROOT/scripts/task-manager.sh" list
 }
@@ -126,8 +222,13 @@ Usage: swarm <command> [arguments]
 
 🚀 Core Commands:
   spawn               Spawn a new agent (interactive)
+  spawn-eng           Spawn an engineering agent (with Claude Reconstruction)
   status              List all active tasks
   check               Run monitor check manually
+  
+🔧 Integration:
+  setup-integration   Setup Claude Reconstruction integration
+  integration-status  Check integration status
   
 📊 Task Management:
   logs <task-id>      View task logs
@@ -146,13 +247,24 @@ Usage: swarm <command> [arguments]
 
 Examples:
   swarm spawn                       # Start a new agent (interactive)
+  swarm spawn-eng                   # Start with engineering config
   swarm status                      # Check all tasks
   swarm logs feat-billing           # View logs
   swarm steer feat-billing "Stop. Focus on API first."
   swarm attach feat-billing         # Attach to tmux session
   swarm install-cron                # Enable automatic monitoring
+  swarm setup-integration           # Setup Claude Reconstruction
 
-For more info: https://docs.openclaw.ai
+Integration with Claude Reconstruction:
+  - Intelligent context management (20% vs 60% context usage)
+  - 5-layer engineering system
+  - Plan-Confirm-Execute-Deliver workflow
+  - Automated rule enforcement
+  
+For more info: 
+  - Agent Swarm: cat .clawdbot/README.md
+  - Integration: cat .clawdbot/INTEGRATION.md
+  - Claude Reconstruction: cat claude-Reconstruction/README.md
 EOF
 }
 
@@ -161,18 +273,21 @@ COMMAND="${1:-help}"
 shift || true
 
 case "$COMMAND" in
-    spawn)          cmd_spawn "$@" ;;
-    status)         cmd_status "$@" ;;
-    logs)           cmd_logs "$@" ;;
-    attach)         cmd_attach "$@" ;;
-    steer)          cmd_steer "$@" ;;
-    check)          cmd_check "$@" ;;
-    kill)           cmd_kill "$@" ;;
-    cleanup)        cmd_cleanup "$@" ;;
-    config)         cmd_config "$@" ;;
-    install-cron)   cmd_install_cron "$@" ;;
-    uninstall-cron) cmd_uninstall_cron "$@" ;;
-    help|--help|-h) cmd_help ;;
+    spawn)              cmd_spawn "$@" ;;
+    spawn-eng)          cmd_spawn_eng "$@" ;;
+    setup-integration)  cmd_setup_integration "$@" ;;
+    integration-status) cmd_integration_status "$@" ;;
+    status)             cmd_status "$@" ;;
+    logs)               cmd_logs "$@" ;;
+    attach)             cmd_attach "$@" ;;
+    steer)              cmd_steer "$@" ;;
+    check)              cmd_check "$@" ;;
+    kill)               cmd_kill "$@" ;;
+    cleanup)            cmd_cleanup "$@" ;;
+    config)             cmd_config "$@" ;;
+    install-cron)       cmd_install_cron "$@" ;;
+    uninstall-cron)     cmd_uninstall_cron "$@" ;;
+    help|--help|-h)     cmd_help ;;
     *)
         echo "Unknown command: $COMMAND"
         echo "Run 'swarm help' for usage"
