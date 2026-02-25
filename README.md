@@ -91,9 +91,45 @@ Layer 1: Delegation Layer  → 专家系统
 - 🎯 **Mid-Task Steering** - 中途干预引导方向
 - 🤖 **多 Agent 并行** - 同时处理多个任务
 - 📊 **自动 Code Review** - Gemini（免费）+ Codex
-- 🔔 **Telegram 通知** - 任务完成自动通知
+- 📱 **Telegram 集成** - 每个任务独立 bot，实时交互（NEW!）
+- 🔔 **实时通知** - Plan 确认、进度更新、完成通知
 - 📝 **完整文档** - 包含快速开始指南和最佳实践
 - 🛠️ **CLI 工具** - 简单易用的命令行界面
+
+---
+
+## 📱 Telegram 集成（NEW!）
+
+**通过 Telegram 实时控制和交互你的 Agent Swarm！**
+
+### 双 Bot 架构
+
+```
+主控制 Bot (@openclaw_control_bot)
+    ├─ 创建和管理所有 agents
+    └─ 查看状态和日志
+
+Agent Bots（每个任务一个）
+    ├─ 实时报告进度
+    ├─ 等待 Plan 确认
+    └─ 接受 steering 指令
+```
+
+### 工作流程示例
+
+```
+你 → 主控制 Bot: "/spawn feat-auth security 实现JWT认证"
+    ↓
+Agent Bot: "📋 [Plan] 我的实现计划是..."
+    ↓
+你 → Agent Bot: "确认"
+    ↓
+Agent Bot: "⚙️ [Execute] 正在实现..."
+    ↓
+Agent Bot: "✅ [Done] PR #123 已创建"
+```
+
+**详细文档：** [Telegram 集成指南](.clawdbot/TELEGRAM_INTEGRATION.md)
 
 ---
 
