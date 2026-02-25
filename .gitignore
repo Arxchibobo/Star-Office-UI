@@ -1,0 +1,37 @@
+# Logs
+.clawdbot/logs/
+*.log
+
+# Temporary files
+.clawdbot/.prompt-*
+.clawdbot/.retry-prompt-*
+.clawdbot/.notify-pending.txt
+.clawdbot/.test-prompt.md
+
+# Generated images
+*.png
+*.jpg
+*.jpeg
+
+# OpenClaw runtime
+.openclaw/
+.clawhub/
+
+# User-specific files (should be in separate repo)
+AGENTS.md
+BOOTSTRAP.md
+HEARTBEAT.md
+IDENTITY.md
+SOUL.md
+USER.md
+memory/
+
+# Node modules
+node_modules/
+demo-video/node_modules/
+
+# Skills (separate from system)
+skills/
+
+# Demo content
+demo-video/

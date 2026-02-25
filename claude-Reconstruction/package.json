@@ -1,0 +1,67 @@
+{
+  "name": "@arxchibobo/claude-reconstruction",
+  "version": "5.2.0",
+  "description": "Production-ready Claude Code engineering config - smart context loading, rules engine, error library, and hook system",
+  "type": "module",
+  "scripts": {
+    "install:config": "node scripts/install.js",
+    "verify": "node scripts/verify.js",
+    "verify:hooks": "node scripts/verify-hooks.js",
+    "test": "node scripts/verify.js",
+    "lint": "prettier --check \"**/*.{md,json,js}\"",
+    "format": "prettier --write \"**/*.{md,json,js}\""
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "devDependencies": {
+    "prettier": "3.2.5"
+  },
+  "keywords": [
+    "claude-code",
+    "ai-engineering",
+    "context-engineering",
+    "configuration",
+    "workflow",
+    "best-practices",
+    "error-handling",
+    "mcp",
+    "skills",
+    "plugins",
+    "hooks"
+  ],
+  "author": {
+    "name": "Arxchibobo",
+    "url": "https://github.com/Arxchibobo"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Arxchibobo/claude-Reconstruction.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Arxchibobo/claude-Reconstruction/issues"
+  },
+  "homepage": "https://github.com/Arxchibobo/claude-Reconstruction#readme",
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "files": [
+    "CLAUDE.md",
+    "CONTEXT_MANAGER.md",
+    "index/",
+    "rules/",
+    "capabilities/",
+    "errors/",
+    "design/",
+    "vibe-marketing/",
+    "scripts/",
+    "README.md",
+    "LICENSE",
+    "CONTRIBUTING.md",
+    "CHANGELOG.md"
+  ]
+}

@@ -1,0 +1,53 @@
+name: Test Installation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-unix:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up permissions
+        run: |
+          chmod +x scripts/install.sh
+          chmod +x scripts/verify.sh
+
+      - name: Run installation
+        run: ./scripts/install.sh
+
+      - name: Verify installation
+        run: ./scripts/verify.sh
+
+      - name: Check installed files
+        run: |
+          echo "Files in ~/.claude/:"
+          find ~/.claude -type f | sort
+
+  test-windows:
+    name: Test on Windows
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run installation (PowerShell)
+        shell: pwsh
+        run: .\scripts\install.ps1
+
+      - name: Check installed files
+        shell: pwsh
+        run: |
+          Write-Host "Files in ~/.claude/:"
+          Get-ChildItem -Path "$env:USERPROFILE\.claude" -Recurse -Depth 2
