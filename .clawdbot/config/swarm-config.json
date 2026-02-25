@@ -5,7 +5,8 @@
     "checkIntervalMinutes": 10,
     "workspaceRoot": "/home/arxchibo/.openclaw/workspace",
     "worktreeRoot": "/home/arxchibo/.openclaw/worktrees",
-    "logDir": "/home/arxchibo/.openclaw/workspace/.clawdbot/logs"
+    "logDir": "/home/arxchibo/.openclaw/workspace/.clawdbot/logs",
+    "geminiApiKey": "AIzaSyB6AAiYnjEyqr6WyqJhP2gNYg41kHTbGIY"
   },
   "agents": {
     "codex": {
@@ -19,7 +20,14 @@
     },
     "gemini": {
       "model": "gemini-2.5-pro",
-      "useCases": ["ui_design", "code_review", "documentation"]
+      "useCases": [
+        "default_agent",
+        "general_coding",
+        "telegram_spawn",
+        "ui_design",
+        "code_review",
+        "documentation"
+      ]
     }
   },
   "definitionOfDone": {

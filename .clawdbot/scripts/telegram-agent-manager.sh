@@ -254,7 +254,7 @@ EOF
     chmod +x "$bot_script"
     
     # 在后台启动 bot
-    nohup python3 "$bot_script" > "$CLAWDBOT_ROOT/logs/bot-$task_id.log" 2>&1 &
+    nohup "$CLAWDBOT_ROOT/venv/bin/python" "$bot_script" > "$CLAWDBOT_ROOT/logs/bot-$task_id.log" 2>&1 &
     local bot_pid=$!
     
     # 保存 PID

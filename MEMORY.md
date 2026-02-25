@@ -38,6 +38,12 @@ Execution: Claude Code/Codex Agents
   - 任务注册: `.clawdbot/active-tasks.json`
   - 脚本: `.clawdbot/scripts/`
   - 文档: `.clawdbot/*.md`
+  - **Telegram 集成:**
+    - 配置: `.clawdbot/config/telegram-agents.json`
+    - 主 Bot: `.clawdbot/scripts/telegram-main-bot.py`
+    - Agent Manager: `.clawdbot/scripts/telegram-agent-manager.sh`
+    - 启动: `.clawdbot/scripts/start-telegram-swarm.sh`
+    - 文档: `.clawdbot/TELEGRAM_INTEGRATION.md`
 
 - **Claude Reconstruction:** `~/.openclaw/workspace/claude-Reconstruction/`
   - 主配置: `CLAUDE.md`
@@ -74,6 +80,11 @@ Execution: Claude Code/Codex Agents
 新项目
   ├─ 需要 AI agents 帮助？
   │   ├─ YES → 使用 Agent Swarm
+  │   │   ├─ 需要移动端监控？
+  │   │   │   └─ YES → 启用 Telegram 集成
+  │   │   │       ├─ 创建主控制 Bot
+  │   │   │       ├─ 通过 Telegram 创建 agents
+  │   │   │       └─ 实时交互和确认
   │   │   ├─ 快速原型/测试？
   │   │   │   └─ YES → ./swarm spawn (普通 agent)
   │   │   └─ 生产级代码？
@@ -173,7 +184,8 @@ Execution: Claude Code/Codex Agents
 - ✅ Claude CLI 已安装 (v2.0.28)
 - ✅ 所有脚本可执行
 - ✅ 完整文档齐全
-- ⚠️ GitHub remote 未配置（需要时配置）
+- ✅ Telegram 集成已实现（双 Bot 架构）
+- ⚠️ GitHub remote 已配置（https://github.com/Arxchibobo/openclaw-arxchibo.git）
 - ⚠️ Cron monitoring 未安装（可选）
 
 ## 最佳实践提醒
@@ -202,3 +214,59 @@ Execution: Claude Code/Codex Agents
 - 使用 nano-banana-pro 而不是 DALL-E（billing limit）
 - Memory search 当前不可用（OpenAI embeddings quota exhausted）
 
+
+## Telegram Bot 系统（2026-02-25）
+
+### 主控Bot (@ArxchiboSwarm_bot)
+- **功能：** 纯命令执行，无LLM依赖，稳定可靠
+- **位置：** `.clawdbot/scripts/telegram-main-bot.py`
+- **配置：** `.clawdbot/config/telegram-agents.json`
+- **启动：** `.clawdbot/scripts/start-telegram-swarm.sh`
+- **状态：** 已部署运行
+
+### 权限系统
+- **双重验证：** 聊天ID + 用户ID
+- **授权用户：** 7744442092, 8573919212
+- **授权聊天：** 私聊(7744442092) + 群组(-1003731869348)
+- **其他人：** 收到"无权限"提示
+
+### 可用命令
+```
+/spawn <id> <type> <desc>  - 创建agent (类型: gemini, claude, codex)
+/status                     - 查看任务状态
+/logs <id>                  - 查看日志
+/kill <id>                  - 杀死任务
+/cleanup                    - 清理完成的任务
+/help                       - 显示帮助
+```
+
+### 群组使用格式
+- 私聊：`/status`
+- 群组：`/status@ArxchiboSwarm_bot`
+
+### 性能优化
+- 轮询间隔：5秒（快速响应）
+- 响应时间：5-10秒内
+- 日志输出：实时（python -u）
+
+### 图片生成Bot（待部署）
+- **脚本：** `.clawdbot/scripts/image-bot.py`
+- **配置：** `.clawdbot/config/image-bot.json`
+- **功能：** 基于nano-banana-pro (Gemini 3 Pro Image)
+- **状态：** 脚本已创建，等待Bot Token配置
+
+### 架构总结
+```
+用户/授权用户 ←→ 小波比（智能决策层）
+                    ↓
+        主控Bot（@ArxchiboSwarm_bot）【纯命令执行层】
+                    ↓
+              Agent Tasks【工作层】
+```
+
+### 关键学习
+1. **Telegram群组命令格式：** 必须用 `/command@BotUsername`
+2. **权限设计：** 双重验证（聊天+用户）防止未授权访问
+3. **轮询优化：** 短timeout（5秒）+ 短sleep（0.1秒）= 快速响应
+4. **日志问题：** Python缓冲导致日志不实时，需要 `-u` 参数
+5. **启动脚本：** 单引号内变量不展开，需用双引号

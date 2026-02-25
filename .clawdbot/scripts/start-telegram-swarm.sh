@@ -50,7 +50,7 @@ fi
 
 # 启动
 if ! pgrep -f "telegram-main-bot.py" > /dev/null; then
-    nohup python3 telegram-main-bot.py > "$CLAWDBOT_ROOT/logs/main-bot.log" 2>&1 &
+    nohup bash -c "source ~/.bashrc && \"$CLAWDBOT_ROOT/venv/bin/python\" -u \"$SCRIPT_DIR/telegram-main-bot.py\"" > "$CLAWDBOT_ROOT/logs/main-bot.log" 2>&1 &
     MAIN_PID=$!
     echo "✓ Main bot started (PID: $MAIN_PID)"
 else

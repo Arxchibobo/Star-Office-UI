@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-OpenClaw Agent Swarm - Main Control Bot
-主控制 Bot，管理所有 Agent Swarm 任务
+OpenClaw Agent Swarm - Main Control Bot (Pure Command Version)
+纯命令版本 - 只执行命令，不做智能理解
 """
 
 import os
@@ -9,345 +9,212 @@ import sys
 import json
 import subprocess
 import requests
-from datetime import datetime
 from pathlib import Path
+import time
 
-# 配置
+# ------------------
+#  Configuration
+# ------------------
 WORKSPACE = Path.home() / ".openclaw" / "workspace"
 CONFIG_FILE = WORKSPACE / ".clawdbot" / "config" / "telegram-agents.json"
-TASKS_FILE = WORKSPACE / ".clawdbot" / "active-tasks.json"
 
-# 加载配置
+# 全局变量
+BOT_TOKEN = None
+AUTHORIZED_CHAT_IDS = []
+AUTHORIZED_USER_IDS = []  # 新增：授权用户列表
+BASE_URL = None
+
+# ------------------
+#  Initialization
+# ------------------
 def load_config():
-    if not CONFIG_FILE.exists():
-        print("Config not found. Run: telegram-agent-manager.sh init")
+    global BOT_TOKEN, AUTHORIZED_CHAT_IDS, AUTHORIZED_USER_IDS, BASE_URL
+    try:
+        with open(CONFIG_FILE) as f:
+            config = json.load(f)
+        main_bot_config = config.get("mainBot", {})
+        BOT_TOKEN = main_bot_config.get("token")
+        
+        # 加载授权聊天ID列表（私聊和群组）
+        auth_chat_ids = main_bot_config.get("authorizedChatIds", [])
+        if auth_chat_ids:
+            AUTHORIZED_CHAT_IDS = [str(cid) for cid in auth_chat_ids]
+        else:
+            admin_chat_id = main_bot_config.get("chatId")
+            if admin_chat_id:
+                AUTHORIZED_CHAT_IDS.append(str(admin_chat_id))
+        
+        # 加载授权用户ID列表（只有这些用户能执行命令）
+        auth_user_ids = main_bot_config.get("authorizedUserIds", [])
+        if auth_user_ids:
+            AUTHORIZED_USER_IDS = [str(uid) for uid in auth_user_ids]
+        else:
+            # 如果没有配置，默认使用chatId作为用户ID（向后兼容）
+            admin_chat_id = main_bot_config.get("chatId")
+            if admin_chat_id:
+                AUTHORIZED_USER_IDS.append(str(admin_chat_id))
+                
+    except Exception as e:
+        print(f"❌ FATAL: Could not load config. Error: {e}")
+        sys.exit(1)
+
+    if not BOT_TOKEN:
+        print("❌ FATAL: Main bot token not found!")
         sys.exit(1)
     
-    with open(CONFIG_FILE) as f:
-        return json.load(f)
+    BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
-config = load_config()
-BOT_TOKEN = config.get("mainBot", {}).get("token", "")
-
-if not BOT_TOKEN:
-    print("Main bot token not configured!")
-    print(f"Edit: {CONFIG_FILE}")
-    sys.exit(1)
-
-BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
-
-# Telegram API 函数
-def send_message(chat_id, text, parse_mode="Markdown", reply_markup=None):
-    """发送消息"""
-    url = f"{BASE_URL}/sendMessage"
-    data = {
-        "chat_id": chat_id,
-        "text": text,
-        "parse_mode": parse_mode
-    }
-    if reply_markup:
-        data["reply_markup"] = reply_markup
-    
+def send_message(chat_id, text, parse_mode="Markdown"):
+    if not BASE_URL:
+        print("❌ BASE_URL not set!")
+        return
     try:
-        resp = requests.post(url, json=data, timeout=10)
-        return resp.json()
+        print(f"📤 Sending to {chat_id}: {text[:50]}...")
+        resp = requests.post(
+            f"{BASE_URL}/sendMessage",
+            json={"chat_id": chat_id, "text": text, "parse_mode": parse_mode},
+            timeout=10
+        )
+        result = resp.json()
+        if result.get("ok"):
+            print(f"✅ Message sent successfully")
+        else:
+            print(f"❌ Send failed: {result}")
+        return result
     except Exception as e:
-        print(f"Error: {e}")
-        return None
+        print(f"❌ Error sending message: {e}")
 
 def get_updates(offset=None):
-    """获取更新"""
-    url = f"{BASE_URL}/getUpdates"
-    params = {"timeout": 30}
+    if not BASE_URL:
+        return None
+    params = {"timeout": 5, "allowed_updates": ["message"]}  # 减少到5秒，快速响应
     if offset:
         params["offset"] = offset
-    
     try:
-        resp = requests.get(url, params=params, timeout=35)
-        return resp.json()
+        print(f"🔍 Polling (offset={offset})...", flush=True)
+        resp = requests.get(f"{BASE_URL}/getUpdates", params=params, timeout=10)
+        result = resp.json()
+        if result.get("ok"):
+            update_count = len(result.get("result", []))
+            if update_count > 0:
+                print(f"📥 Got {update_count} update(s)", flush=True)
+            else:
+                print(f"   Empty result", flush=True)
+        return result
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"❌ Error getting updates: {e}", flush=True)
         return None
 
-# 工具函数
 def run_command(cmd):
-    """运行 shell 命令"""
     try:
         result = subprocess.run(
-            cmd,
-            shell=True,
-            capture_output=True,
-            text=True,
-            cwd=WORKSPACE
+            cmd, shell=True, capture_output=True, text=True, cwd=WORKSPACE
         )
-        return result.stdout if result.returncode == 0 else result.stderr
+        return result.stdout if result.returncode == 0 else f"Error:\n{result.stderr}"
     except Exception as e:
-        return f"Error: {e}"
+        return f"Error running command: {e}"
 
-def load_tasks():
-    """加载任务列表"""
-    if not TASKS_FILE.exists():
-        return []
-    
-    try:
-        with open(TASKS_FILE) as f:
-            return json.load(f)
-    except:
-        return []
+# ------------------
+#  Command Handlers
+# ------------------
+def execute_command(chat_id, command, args):
+    # Map commands to actual swarm operations
+    if command == "help":
+        help_text = """*OpenClaw Agent Swarm 控制中心*
 
-# 命令处理
-def cmd_start(chat_id):
-    """处理 /start 命令"""
-    text = """
-🤖 *OpenClaw Agent Swarm 控制中心*
+可用命令：
+• `/spawn <id> <type> <desc>` - 创建 agent
+  类型: gemini, claude, codex
+• `/status` - 查看任务状态
+• `/logs <id>` - 查看日志
+• `/kill <id>` - 杀死任务
+• `/cleanup` - 清理完成的任务
+• `/help` - 显示此帮助
 
-欢迎！我可以帮你管理所有 AI coding agents。
-
-*可用命令：*
-• /spawn - 创建新 agent
-• /status - 查看所有任务
-• /list - 列出运行中的 agents
-• /logs <task-id> - 查看日志
-• /kill <task-id> - 杀死任务
-• /cleanup - 清理完成的任务
-• /help - 显示帮助
-
-*工作流程：*
-1. 用 /spawn 创建 agent
-2. 系统会为任务创建专属 bot
-3. 通过专属 bot 实时交互
-4. 完成后收到通知
-
-开始创建你的第一个 agent 吧！
+示例:
+`/spawn my-task gemini 创建一个登录页面`
 """
-    send_message(chat_id, text)
-
-def cmd_spawn(chat_id, args):
-    """处理 /spawn 命令"""
-    if not args:
-        text = """
-*创建新 Agent*
-
-用法：
-\`/spawn <task-id> <agent-type> <description>\`
-
-示例：
-\`/spawn feat-auth claude "实现用户认证功能"\`
-
-Agent 类型：
-• \`codex\` - 后端逻辑、复杂 bug
-• \`claude\` - 前端、快速迭代
-• \`gemini\` - UI 设计
-
-或者使用工程化模式（推荐）：
-\`/spawn-eng <task-id> <task-type> <description>\`
-
-任务类型：
-• \`api\` - API 开发
-• \`frontend\` - 前端开发
-• \`testing\` - 测试开发
-• \`security\` - 安全功能
-"""
-        send_message(chat_id, text)
+        send_message(chat_id, help_text)
         return
     
-    # 解析参数
-    parts = args.split(None, 2)
-    if len(parts) < 3:
-        send_message(chat_id, "❌ 参数不足\n\n用法: `/spawn <task-id> <agent-type> <description>`")
+    if command == "start":
+        send_message(chat_id, "👋 欢迎使用 Agent Swarm 控制中心！\n\n发送 /help 查看可用命令。")
         return
     
-    task_id, agent_type, description = parts
+    # Execute swarm command
+    full_cmd = f"./swarm {command} {args}"
+    print(f"Executing: {full_cmd}")
+    send_message(chat_id, f"⚙️ 运行中: `{full_cmd}`")
     
-    # 确认创建
-    text = f"""
-📋 *创建 Agent 确认*
-
-任务 ID: \`{task_id}\`
-Agent 类型: `{agent_type}`
-描述: {description}
-
-确认创建？发送 "确认" 或 "yes"
-取消发送 "取消" 或 "no"
-"""
-    send_message(chat_id, text)
+    output = run_command(full_cmd)
     
-    # TODO: 保存待确认状态，等待用户回复
-
-def cmd_status(chat_id):
-    """处理 /status 命令"""
-    tasks = load_tasks()
-    
-    if not tasks:
-        send_message(chat_id, "📭 没有活动的任务")
-        return
-    
-    # 按状态分组
-    running = [t for t in tasks if t["status"] in ["running", "retrying"]]
-    done = [t for t in tasks if t["status"] == "done"]
-    failed = [t for t in tasks if t["status"] == "failed"]
-    
-    text = "*📊 任务状态总览*\n\n"
-    
-    if running:
-        text += f"*🟢 运行中 ({len(running)})*\n"
-        for task in running[:5]:
-            text += f"• \`{task['id']}\` - {task['agent']} - {task['status']}\n"
-        if len(running) > 5:
-            text += f"  ...还有 {len(running) - 5} 个\n"
-        text += "\n"
-    
-    if done:
-        text += f"*✅ 已完成 ({len(done)})*\n"
-        for task in done[:3]:
-            pr = task.get('pr', 'N/A')
-            text += f"• \`{task['id']}\` - PR #{pr}\n"
-        if len(done) > 3:
-            text += f"  ...还有 {len(done) - 3} 个\n"
-        text += "\n"
-    
-    if failed:
-        text += f"*❌ 失败 ({len(failed)})*\n"
-        for task in failed[:3]:
-            text += f"• \`{task['id']}\` - {task.get('retryCount', 0)} 次重试\n"
-        text += "\n"
-    
-    text += f"\n总计: {len(tasks)} 个任务"
-    
-    send_message(chat_id, text)
-
-def cmd_list(chat_id):
-    """处理 /list 命令"""
-    output = run_command("./swarm status")
-    send_message(chat_id, f"```\n{output}\n```")
-
-def cmd_logs(chat_id, task_id):
-    """处理 /logs 命令"""
-    if not task_id:
-        send_message(chat_id, "用法: `/logs <task-id>`")
-        return
-    
-    output = run_command(f"./swarm logs {task_id} | tail -50")
-    
+    # Truncate if too long
     if len(output) > 4000:
         output = output[-4000:]
     
-    send_message(chat_id, f"*日志: {task_id}*\n\n```\n{output}\n```")
+    send_message(chat_id, f"*结果:*\n\n```\n{output}\n```")
 
-def cmd_kill(chat_id, task_id):
-    """处理 /kill 命令"""
-    if not task_id:
-        send_message(chat_id, "用法: `/kill <task-id>`")
+# ------------------
+#  Message Handler
+# ------------------
+def handle_message(message):
+    chat_id = str(message["chat"]["id"])
+    user_id = str(message["from"]["id"])
+    text = message.get("text", "")
+    username = message["from"].get("username", "Unknown")
+    
+    # 双重检查：聊天必须授权 AND 用户必须授权
+    if chat_id not in AUTHORIZED_CHAT_IDS:
+        print(f"❌ Unauthorized chat: {chat_id}")
         return
     
-    output = run_command(f"./swarm kill {task_id}")
-    send_message(chat_id, f"🔪 *杀死任务*\n\n```\n{output}\n```")
-
-def cmd_cleanup(chat_id):
-    """处理 /cleanup 命令"""
-    output = run_command("./swarm cleanup")
-    send_message(chat_id, f"🧹 *清理完成*\n\n```\n{output}\n```")
-
-def cmd_help(chat_id):
-    """处理 /help 命令"""
-    text = """
-*🤖 命令参考*
-
-*任务管理*
-• `/spawn <id> <type> <desc>` - 创建 agent
-• `/spawn-eng <id> <type> <desc>` - 创建工程化 agent
-• `/status` - 查看所有任务状态
-• `/list` - 列出运行中的任务
-• `/logs <task-id>` - 查看任务日志
-• `/kill <task-id>` - 杀死任务
-• `/cleanup` - 清理完成的任务
-
-*Agent 类型*
-• `codex` - 后端、复杂逻辑
-• `claude` - 前端、快速迭代
-• `gemini` - UI 设计
-
-*任务类型（工程化）*
-• `api` - API 开发
-• `frontend` - 前端
-• `testing` - 测试
-• `security` - 安全
-
-*工作流程*
-1. 创建 agent → 系统为其创建专属 bot
-2. 专属 bot 加入你的对话列表
-3. 通过专属 bot 实时交互
-4. Plan 阶段等待你确认
-5. 完成后发送 PR 链接
-
-*提示*
-• 每个任务都有独立的 Telegram bot
-• 可以直接向 agent bot 发送 steering 指令
-• 主控制 bot 用于管理，agent bot 用于交互
-"""
-    send_message(chat_id, text)
-
-# 消息处理
-def handle_message(message):
-    """处理消息"""
-    chat_id = message["chat"]["id"]
-    text = message.get("text", "")
+    if user_id not in AUTHORIZED_USER_IDS:
+        print(f"❌ Unauthorized user: {user_id} (@{username}) in chat {chat_id}")
+        send_message(chat_id, f"⛔️ 抱歉，你没有权限使用此Bot。")
+        return
     
-    # 命令分发
-    if text.startswith("/"):
-        parts = text.split(None, 1)
-        cmd = parts[0].lower()
-        args = parts[1] if len(parts) > 1 else ""
-        
-        if cmd == "/start":
-            cmd_start(chat_id)
-        elif cmd == "/spawn":
-            cmd_spawn(chat_id, args)
-        elif cmd == "/status":
-            cmd_status(chat_id)
-        elif cmd == "/list":
-            cmd_list(chat_id)
-        elif cmd == "/logs":
-            cmd_logs(chat_id, args)
-        elif cmd == "/kill":
-            cmd_kill(chat_id, args)
-        elif cmd == "/cleanup":
-            cmd_cleanup(chat_id)
-        elif cmd == "/help":
-            cmd_help(chat_id)
-        else:
-            send_message(chat_id, f"未知命令: {cmd}\n\n发送 /help 查看帮助")
-    else:
-        # 非命令消息
-        send_message(chat_id, "发送 /help 查看可用命令")
+    print(f"✅ Authorized command from user {user_id} (@{username}) in chat {chat_id}")
+    
+    # Only process commands (starting with /)
+    if not text.startswith("/"):
+        send_message(chat_id, "请使用命令格式。发送 /help 查看可用命令。")
+        return
+    
+    # Parse command
+    command_part = text.split('@')[0]  # Handle @botname in groups
+    parts = command_part.split(None, 1)
+    cmd = parts[0][1:].lower()  # Remove /
+    args = parts[1].strip() if len(parts) > 1 else ""
+    
+    print(f"📨 Command: /{cmd} {args}")
+    execute_command(chat_id, cmd, args)
 
-# 主循环
+# ------------------
+#  Main Loop
+# ------------------
 def main():
-    """主循环"""
-    print("🤖 Main Control Bot Starting...")
-    print(f"Workspace: {WORKSPACE}")
-    print(f"Config: {CONFIG_FILE}")
-    print("")
+    load_config()
+    print("🤖 Main Control Bot Starting (Pure Command Mode)...")
+    print(f"✅ Authorized Chats: {AUTHORIZED_CHAT_IDS}")
+    print(f"✅ Authorized Users: {AUTHORIZED_USER_IDS}")
+    print("🔄 Polling for commands...")
     
     offset = None
-    
     while True:
         try:
-            result = get_updates(offset)
-            
-            if result and result.get("ok"):
-                for update in result.get("result", []):
+            updates = get_updates(offset)
+            if updates and updates.get("ok"):
+                result_list = updates.get("result", [])
+                for update in result_list:
                     offset = update["update_id"] + 1
-                    
                     if "message" in update:
                         handle_message(update["message"])
-            
+            time.sleep(0.1)  # 快速轮询
         except KeyboardInterrupt:
             print("\n👋 Bot stopped")
             break
         except Exception as e:
-            print(f"❌ Error: {e}")
-            import time
+            print(f"❌ Error in main loop: {e}")
             time.sleep(5)
 
 if __name__ == "__main__":
