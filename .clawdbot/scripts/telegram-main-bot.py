@@ -141,9 +141,35 @@ def execute_command(chat_id, command, args):
         send_message(chat_id, "👋 欢迎使用 Agent Swarm 控制中心！\n\n发送 /help 查看可用命令。")
         return
     
-    # Execute swarm command
+    # Special handling for spawn command
+    if command == "spawn":
+        # Parse spawn args: <id> <type> <desc>
+        parts = args.split(None, 2)
+        if len(parts) < 3:
+            send_message(chat_id, "❌ 参数不足\n\n用法: `/spawn <id> <type> <desc>`\n\n示例: `/spawn my-task gemini 创建登录页面`")
+            return
+        
+        task_id, agent_type, description = parts
+        
+        # Validate agent type
+        if agent_type not in ['gemini', 'claude', 'codex']:
+            send_message(chat_id, f"❌ 无效的agent类型: {agent_type}\n\n支持的类型: gemini, claude, codex")
+            return
+        
+        # Use non-interactive spawn script
+        spawn_script = f"{Path.home()}/.openclaw/workspace/.clawdbot/scripts/spawn-agent-noninteractive.sh"
+        full_cmd = f"{spawn_script} '{task_id}' '{agent_type}' '{description}'"
+        
+        print(f"Executing spawn: {full_cmd}", flush=True)
+        send_message(chat_id, f"🚀 正在创建 Agent...\n\nTask ID: `{task_id}`\nType: `{agent_type}`")
+        
+        output = run_command(full_cmd)
+        send_message(chat_id, f"*结果:*\n\n```\n{output}\n```")
+        return
+    
+    # Execute regular swarm command
     full_cmd = f"./swarm {command} {args}"
-    print(f"Executing: {full_cmd}")
+    print(f"Executing: {full_cmd}", flush=True)
     send_message(chat_id, f"⚙️ 运行中: `{full_cmd}`")
     
     output = run_command(full_cmd)
