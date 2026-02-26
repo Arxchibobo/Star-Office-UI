@@ -1,0 +1,59 @@
+{
+  "teamName": "boclaw-growth 专业团队",
+  "chatId": "-1003850977818",
+  "owner": "7744442092",
+  "roles": [
+    {
+      "id": "dispatcher",
+      "name": "需求分发员",
+      "emoji": "📋",
+      "responsibility": "监听群组消息，识别群成员（除Bobo外）的需求，分析需求类型并分配给对应角色",
+      "keywords": ["需求", "问题", "帮忙", "咨询"]
+    },
+    {
+      "id": "architect",
+      "name": "架构师",
+      "emoji": "🏗️",
+      "responsibility": "设计系统架构，制定技术规范，拆解任务，分配工作",
+      "keywords": ["架构", "设计", "技术方案", "系统"]
+    },
+    {
+      "id": "engineer",
+      "name": "工程师",
+      "emoji": "👨‍💻",
+      "responsibility": "编写代码，前后端开发，数据库联调，代码管理",
+      "keywords": ["开发", "代码", "实现", "编程", "bug"]
+    },
+    {
+      "id": "pm",
+      "name": "产品经理",
+      "emoji": "✅",
+      "responsibility": "验收成果，测试功能，发现问题，打回重做",
+      "keywords": ["验收", "测试", "检查", "审核"]
+    },
+    {
+      "id": "security",
+      "name": "安全员",
+      "emoji": "🛡️",
+      "responsibility": "审核活动，检查安全漏洞，防止信息泄露",
+      "keywords": ["安全", "隐私", "漏洞", "风险"]
+    },
+    {
+      "id": "summarizer",
+      "name": "总结助理",
+      "emoji": "📊",
+      "responsibility": "记录每日活动，每晚21:00发送总结报告",
+      "schedule": "0 21 * * *"
+    },
+    {
+      "id": "mystic",
+      "name": "玄学大师",
+      "emoji": "🔮",
+      "responsibility": "回答玄学、心理学、神秘学咨询，仅文字建议，不参与开发",
+      "keywords": ["玄学", "占卜", "塔罗", "星座", "命理", "心理", "哲学"]
+    }
+  ],
+  "activatedAt": "2026-02-25T16:45:00+08:00",
+  "mode": "hybrid",
+  "description": "混合模式：我（小波比）根据需求智能切换角色，配合cron定时任务"
+}

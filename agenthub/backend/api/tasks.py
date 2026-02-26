@@ -1,89 +1,31 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from pydantic import BaseModel
+"""
+Task 相关 API
+"""
 from typing import List, Optional
 from datetime import datetime
-import json
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from sqlalchemy.orm import Session
+from sqlalchemy import desc, asc
 
-import sys
-sys.path.append('..')
-from models import Task, Agent, TaskBid, FeedPost
 from database import get_db
-from websocket.manager import manager
+from models import Task, Agent, User, TaskBid
+from schemas import (
+    TaskCreate, TaskUpdate, TaskResponse, TaskDetailResponse,
+    TaskBidCreate, TaskBidResponse, TaskAssign, TaskComplete,
+    BidSummary
+)
+from auth import get_current_user
 
-router = APIRouter(prefix="/tasks", tags=["tasks"])
+router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
-# Pydantic schemas
-class TaskCreate(BaseModel):
-    title: str
-    description: str
-    requirements: str = ""
-    reward_points: int = 100
-    difficulty: str = "medium"
-    category: str = "general"
-    created_by: str = "user"
 
-class TaskBidCreate(BaseModel):
-    agent_id: int
-    bid_message: str
-    estimated_time: str
-    bid_points: int
-
-class TaskResponse(BaseModel):
-    id: int
-    title: str
-    description: str
-    requirements: str
-    reward_points: int
-    status: str
-    difficulty: str
-    category: str
-    created_by: str
-    created_at: datetime
-    assigned_agent: Optional[dict] = None
-    
-    class Config:
-        from_attributes = True
-
-@router.get("/", response_model=List[TaskResponse])
-async def list_tasks(status: Optional[str] = None, db: Session = Depends(get_db)):
-    """获取任务列表"""
-    query = db.query(Task)
-    if status:
-        query = query.filter(Task.status == status)
-    tasks = query.order_by(Task.created_at.desc()).all()
-    
-    result = []
-    for task in tasks:
-        task_dict = {
-            "id": task.id,
-            "title": task.title,
-            "description": task.description,
-            "requirements": task.requirements or "",
-            "reward_points": task.reward_points,
-            "status": task.status,
-            "difficulty": task.difficulty,
-            "category": task.category,
-            "created_by": task.created_by,
-            "created_at": task.created_at,
-            "assigned_agent": None
-        }
-        
-        if task.assigned_agent_id:
-            agent = db.query(Agent).filter(Agent.id == task.assigned_agent_id).first()
-            if agent:
-                task_dict["assigned_agent"] = {
-                    "id": agent.id,
-                    "name": agent.name,
-                    "avatar": agent.avatar
-                }
-        
-        result.append(task_dict)
-    return result
-
-@router.post("/", response_model=TaskResponse)
-async def create_task(task_data: TaskCreate, db: Session = Depends(get_db)):
-    """创建新任务"""
+@router.post("", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+def create_task(
+    task_data: TaskCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """创建任务"""
     new_task = Task(
         title=task_data.title,
         description=task_data.description,
@@ -91,198 +33,339 @@ async def create_task(task_data: TaskCreate, db: Session = Depends(get_db)):
         reward_points=task_data.reward_points,
         difficulty=task_data.difficulty,
         category=task_data.category,
-        created_by=task_data.created_by,
-        status="open"
+        created_by=current_user.id,
+        deadline=task_data.deadline,
+        estimated_hours=task_data.estimated_hours
     )
+    
     db.add(new_task)
     db.commit()
     db.refresh(new_task)
     
-    # 广播新任务
-    await manager.broadcast_task_update({
-        "event": "task_created",
-        "task": {
-            "id": new_task.id,
-            "title": new_task.title,
-            "reward_points": new_task.reward_points,
-            "difficulty": new_task.difficulty,
-            "category": new_task.category
-        }
-    })
+    return new_task
+
+
+@router.get("", response_model=List[TaskResponse])
+def list_tasks(
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    status: Optional[str] = None,
+    difficulty: Optional[str] = None,
+    category: Optional[str] = None,
+    min_reward: Optional[int] = None,
+    max_reward: Optional[int] = None,
+    sort: str = Query("created_at", regex="^(reward_points|created_at|deadline)$"),
+    order: str = Query("desc", regex="^(asc|desc)$"),
+    db: Session = Depends(get_db)
+):
+    """获取任务列表"""
+    query = db.query(Task)
+    
+    # 过滤
+    if status:
+        query = query.filter(Task.status == status)
+    if difficulty:
+        query = query.filter(Task.difficulty == difficulty)
+    if category:
+        query = query.filter(Task.category == category)
+    if min_reward:
+        query = query.filter(Task.reward_points >= min_reward)
+    if max_reward:
+        query = query.filter(Task.reward_points <= max_reward)
+    
+    # 排序
+    order_func = desc if order == "desc" else asc
+    if sort == "reward_points":
+        query = query.order_by(order_func(Task.reward_points))
+    elif sort == "deadline":
+        query = query.order_by(order_func(Task.deadline))
+    else:
+        query = query.order_by(order_func(Task.created_at))
+    
+    # 分页
+    total = query.count()
+    tasks = query.offset((page - 1) * limit).limit(limit).all()
+    
+    return tasks
+
+
+@router.get("/{task_id}", response_model=TaskDetailResponse)
+def get_task(task_id: int, db: Session = Depends(get_db)):
+    """获取任务详情"""
+    task = db.query(Task).filter(Task.id == task_id).first()
+    if not task:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Task not found"
+        )
+    
+    # 获取竞标信息
+    bids = db.query(TaskBid).filter(TaskBid.task_id == task_id).all()
+    bid_summaries = []
+    for bid in bids:
+        agent = db.query(Agent).filter(Agent.id == bid.agent_id).first()
+        bid_summaries.append(BidSummary(
+            id=bid.id,
+            agent_id=bid.agent_id,
+            agent_name=agent.name if agent else "Unknown",
+            agent_avatar=agent.avatar if agent else "🤖",
+            bid_message=bid.bid_message,
+            estimated_time=bid.estimated_time,
+            bid_points=bid.bid_points,
+            status=bid.status,
+            created_at=bid.created_at
+        ))
     
     return {
-        "id": new_task.id,
-        "title": new_task.title,
-        "description": new_task.description,
-        "requirements": new_task.requirements or "",
-        "reward_points": new_task.reward_points,
-        "status": new_task.status,
-        "difficulty": new_task.difficulty,
-        "category": new_task.category,
-        "created_by": new_task.created_by,
-        "created_at": new_task.created_at,
-        "assigned_agent": None
+        **task.__dict__,
+        "creator": task.creator,
+        "assigned_agent": task.assigned_agent,
+        "bids": bid_summaries
     }
 
-@router.post("/{task_id}/bid")
-async def bid_on_task(task_id: int, bid_data: TaskBidCreate, db: Session = Depends(get_db)):
-    """Agent对任务进行竞标"""
+
+@router.post("/{task_id}/bids", response_model=TaskBidResponse, status_code=status.HTTP_201_CREATED)
+def create_bid(
+    task_id: int,
+    bid_data: TaskBidCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Agent 竞标任务"""
+    # 检查任务存在
     task = db.query(Task).filter(Task.id == task_id).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     
+    # 检查任务是否可竞标
     if task.status != "open":
         raise HTTPException(status_code=400, detail="Task is not open for bidding")
     
+    # 检查 Agent 存在且属于当前用户
     agent = db.query(Agent).filter(Agent.id == bid_data.agent_id).first()
     if not agent:
         raise HTTPException(status_code=404, detail="Agent not found")
+    if agent.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to bid with this agent")
+    
+    # 检查是否已竞标
+    existing_bid = db.query(TaskBid).filter(
+        TaskBid.task_id == task_id,
+        TaskBid.agent_id == bid_data.agent_id
+    ).first()
+    if existing_bid:
+        raise HTTPException(status_code=409, detail="Agent already bid on this task")
     
     # 创建竞标
-    bid = TaskBid(
+    new_bid = TaskBid(
         task_id=task_id,
         agent_id=bid_data.agent_id,
         bid_message=bid_data.bid_message,
         estimated_time=bid_data.estimated_time,
         bid_points=bid_data.bid_points
     )
-    db.add(bid)
+    
+    db.add(new_bid)
     db.commit()
+    db.refresh(new_bid)
     
-    # 发布动态
-    post = FeedPost(
-        agent_id=agent.id,
-        content=f"💼 I'm interested in task: {task.title}! {bid_data.bid_message}",
-        post_type="task_bid",
-        metadata=json.dumps({"task_id": task_id})
-    )
-    db.add(post)
-    db.commit()
-    
-    # 广播竞标
-    await manager.broadcast_feed_post({
-        "id": post.id,
-        "agent": {
-            "id": agent.id,
-            "name": agent.name,
-            "avatar": agent.avatar
-        },
-        "content": post.content,
-        "post_type": post.post_type,
-        "created_at": post.created_at.isoformat()
-    })
-    
-    return {"status": "success", "bid_id": bid.id}
+    return new_bid
 
-@router.post("/{task_id}/assign/{agent_id}")
-async def assign_task(task_id: int, agent_id: int, db: Session = Depends(get_db)):
-    """将任务分配给Agent"""
+
+@router.post("/{task_id}/assign", status_code=status.HTTP_200_OK)
+def assign_task(
+    task_id: int,
+    assign_data: TaskAssign,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """分配任务给 Agent"""
     task = db.query(Task).filter(Task.id == task_id).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     
-    agent = db.query(Agent).filter(Agent.id == agent_id).first()
+    # 权限检查：只有任务创建者可以分配
+    if task.created_by != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to assign this task")
+    
+    # 检查任务状态
+    if task.status != "open":
+        raise HTTPException(status_code=400, detail="Task is not open")
+    
+    # 检查 Agent 存在
+    agent = db.query(Agent).filter(Agent.id == assign_data.agent_id).first()
     if not agent:
         raise HTTPException(status_code=404, detail="Agent not found")
     
+    # 如果提供了 bid_id，验证 bid
+    if assign_data.bid_id:
+        bid = db.query(TaskBid).filter(
+            TaskBid.id == assign_data.bid_id,
+            TaskBid.task_id == task_id,
+            TaskBid.agent_id == assign_data.agent_id
+        ).first()
+        if not bid:
+            raise HTTPException(status_code=404, detail="Bid not found")
+        bid.status = "accepted"
+    
     # 分配任务
-    task.assigned_agent_id = agent_id
+    task.assigned_agent_id = assign_data.agent_id
     task.status = "assigned"
+    task.assigned_at = datetime.utcnow()
+    
+    # 更新 Agent 状态
     agent.status = "working"
+    
     db.commit()
     
-    # 发布动态
-    post = FeedPost(
-        agent_id=agent.id,
-        content=f"🚀 Starting task: {task.title}",
-        post_type="task_started",
-        metadata=json.dumps({"task_id": task_id})
-    )
-    db.add(post)
-    db.commit()
-    
-    # 广播更新
-    await manager.broadcast_task_update({
-        "event": "task_assigned",
+    return {
         "task_id": task_id,
-        "agent": {
-            "id": agent.id,
-            "name": agent.name,
-            "avatar": agent.avatar
-        }
-    })
-    
-    await manager.broadcast_feed_post({
-        "id": post.id,
-        "agent": {
-            "id": agent.id,
-            "name": agent.name,
-            "avatar": agent.avatar
-        },
-        "content": post.content,
-        "post_type": post.post_type,
-        "created_at": post.created_at.isoformat()
-    })
-    
-    return {"status": "success"}
+        "agent_id": assign_data.agent_id,
+        "status": "assigned",
+        "assigned_at": task.assigned_at
+    }
 
-@router.post("/{task_id}/complete")
-async def complete_task(task_id: int, db: Session = Depends(get_db)):
+
+@router.post("/{task_id}/start", status_code=status.HTTP_200_OK)
+def start_task(
+    task_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """开始任务"""
+    task = db.query(Task).filter(Task.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    # 检查 Agent 权限
+    if not task.assigned_agent_id:
+        raise HTTPException(status_code=400, detail="Task not assigned")
+    
+    agent = db.query(Agent).filter(Agent.id == task.assigned_agent_id).first()
+    if agent.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # 检查任务状态
+    if task.status != "assigned":
+        raise HTTPException(status_code=400, detail="Task cannot be started")
+    
+    # 开始任务
+    task.status = "in_progress"
+    task.started_at = datetime.utcnow()
+    agent.status = "working"
+    
+    db.commit()
+    
+    return {
+        "task_id": task_id,
+        "status": "in_progress",
+        "started_at": task.started_at
+    }
+
+
+@router.post("/{task_id}/complete", status_code=status.HTTP_200_OK)
+def complete_task(
+    task_id: int,
+    complete_data: TaskComplete,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """完成任务"""
     task = db.query(Task).filter(Task.id == task_id).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     
+    # 检查 Agent 权限
     if not task.assigned_agent_id:
         raise HTTPException(status_code=400, detail="Task not assigned")
     
     agent = db.query(Agent).filter(Agent.id == task.assigned_agent_id).first()
+    if agent.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # 检查任务状态
+    if task.status != "in_progress":
+        raise HTTPException(status_code=400, detail="Task is not in progress")
     
     # 完成任务
     task.status = "completed"
     task.completed_at = datetime.utcnow()
-    agent.status = "idle"
-    agent.reputation += task.reward_points
+    task.completion_notes = complete_data.completion_notes
+    task.deliverables = complete_data.deliverables
+    
+    # 计算实际耗时
+    if task.started_at:
+        hours = (task.completed_at - task.started_at).total_seconds() / 3600
+        task.actual_hours = round(hours, 2)
+    
+    # 更新 Agent 统计
     agent.total_tasks_completed += 1
+    agent.experience_points += task.reward_points
+    agent.reputation += 50  # 基础声誉奖励
+    agent.status = "idle"
     
-    # 升级判断
-    if agent.total_tasks_completed % 5 == 0:
-        agent.level += 1
+    # 计算等级（简单公式）
+    agent.level = int((agent.experience_points / 100) ** 0.5) + 1
     
-    db.commit()
+    # 给 Agent owner 发放奖励
+    owner = db.query(User).filter(User.id == agent.owner_id).first()
+    owner.points_balance += task.reward_points
     
-    # 发布动态
-    post = FeedPost(
+    # 记录交易
+    from models import Transaction
+    transaction = Transaction(
+        user_id=owner.id,
         agent_id=agent.id,
-        content=f"✅ Completed task: {task.title}! Earned {task.reward_points} points 🎉",
-        post_type="task_completed",
-        metadata=json.dumps({"task_id": task_id, "reward": task.reward_points})
+        transaction_type="task_reward",
+        amount=task.reward_points,
+        balance_after=owner.points_balance,
+        description=f"Task completed: {task.title}",
+        metadata={"task_id": task_id, "task_title": task.title}
     )
-    db.add(post)
+    db.add(transaction)
+    
     db.commit()
     
-    # 广播更新
-    await manager.broadcast_task_update({
-        "event": "task_completed",
+    return {
         "task_id": task_id,
-        "agent": {
-            "id": agent.id,
-            "name": agent.name,
-            "reputation": agent.reputation,
-            "level": agent.level
-        }
-    })
+        "status": "completed",
+        "completed_at": task.completed_at,
+        "reward_points": task.reward_points,
+        "agent_reputation_gain": 50
+    }
+
+
+@router.post("/{task_id}/cancel", status_code=status.HTTP_200_OK)
+def cancel_task(
+    task_id: int,
+    reason: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """取消任务"""
+    task = db.query(Task).filter(Task.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
     
-    await manager.broadcast_feed_post({
-        "id": post.id,
-        "agent": {
-            "id": agent.id,
-            "name": agent.name,
-            "avatar": agent.avatar
-        },
-        "content": post.content,
-        "post_type": post.post_type,
-        "created_at": post.created_at.isoformat()
-    })
+    # 权限检查
+    if task.created_by != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to cancel this task")
     
-    return {"status": "success", "reward": task.reward_points}
+    # 取消任务
+    task.status = "cancelled"
+    task.cancelled_at = datetime.utcnow()
+    task.completion_notes = f"Cancelled: {reason}"
+    
+    # 释放 Agent
+    if task.assigned_agent_id:
+        agent = db.query(Agent).filter(Agent.id == task.assigned_agent_id).first()
+        if agent:
+            agent.status = "idle"
+    
+    db.commit()
+    
+    return {
+        "task_id": task_id,
+        "status": "cancelled",
+        "reason": reason
+    }

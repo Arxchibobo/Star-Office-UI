@@ -14,6 +14,58 @@
 - **Cross-session consistency:** Tool configurations and skills are shared across all sessions (group and private), but conversation memory is isolated for privacy.
 - **Claude CLI:** Installed at /usr/local/bin/claude (version 2.0.28)
 - **Workspace:** ~/.openclaw/workspace (local git repo, no remote configured yet)
+- **Remotion Video:** `remotion-video-toolkit` skill installed for programmatic video generation
+
+## boclaw-growth 专业团队系统（2026-02-25启动）
+
+由于 Telegram 群组技术限制（不支持持久子agent），采用**混合模式**：我（小波比）智能切换7个专业角色 + Cron定时任务。
+
+### Telegram Subagent Hooks 开发项目（2026-02-25启动）
+
+**目标：** 为 OpenClaw Telegram channel 添加持久性子agent支持（thread-bound sessions）
+
+**技术方案：** 
+- 利用 Telegram Forum Topics 作为线程绑定
+- 参考 Discord 实现，适配 Telegram API
+- 3个核心 hooks: subagent_spawning / subagent_ended / subagent_delivery_target
+
+**项目状态：**
+- ✅ Phase 1: 基础框架完成（2026-02-25）
+  - 核心 hooks 实现（270行 TypeScript）
+  - 完整文档和测试框架
+  - Git 仓库：`~/.openclaw/workspace/telegram-subagent-hooks`
+  - 提交：5b80419
+
+- 🔄 Phase 2: Bot API 集成（进行中）
+  - 需要实现 `createForumTopic` API 调用
+  - 预计 6 小时
+
+- ⏳ Phase 3-6: 待完成（预计28小时总计）
+
+**项目位置：** `~/.openclaw/workspace/telegram-subagent-hooks`  
+**文档：** README.md, DEV_PLAN.md, NEXT_STEPS.md
+
+### 7个专业角色
+
+1. **📋 需求分发员** - 自动识别群成员需求（除Bobo外），分析并分配给对应角色
+2. **🏗️ 架构师** - 系统设计、技术方案、任务拆解、规则制定
+3. **👨‍💻 工程师** - 代码开发、前后端联调、Git管理、使用coding-agent skill
+4. **✅ 产品经理** - 验收成果、功能测试、发现问题、打回重做
+5. **🛡️ 安全员** - 安全审查、隐私保护、漏洞检测、防止信息泄露
+6. **📊 总结助理** - 记录每日活动，每晚21:00自动发送总结报告（Cron Job）
+7. **🔮 玄学大师** - 玄学/心理学/神秘学咨询，仅文字建议，不参与开发
+
+### 工作模式
+
+- **智能角色切换** - 根据消息内容自动识别并以对应角色回复
+- **关键词触发** - 检测消息中的关键词（如"架构"、"安全"、"玄学"等）
+- **显式指定** - 用户可以在消息中明确提到角色名称
+- **自动总结** - Cron Job ID: 4e6528ca-0f89-453e-b7db-2bd4df9ed6aa，每晚21:00（Asia/Shanghai）
+
+### 配置文件
+
+- 角色定义：`.clawdbot/team-roles.json`
+- Cron任务：每日21:00执行，发送到群组 -1003850977818
 
 ## Agent Swarm 系统 - 知识图谱
 
