@@ -11,8 +11,7 @@ SWARM_BOT_TOKEN = "8222373172:AAHOIrA6ujqZiCN5Pv25vOaJIKIRzaA5ifY"
 BOBO_BOT_TOKEN = "8573919212:AAFSir6wFSloGUcx8doZvwwwSsQylBl0Ovk"
 
 # WebApp URL - 完整像素版本
-WEBAPP_URL = "http://localhost:18793/"  # 本地测试
-# 如果需要外网访问，使用cloudflare tunnel或ngrok等工具
+WEBAPP_URL = "https://sub-stainless-columnists-voters.trycloudflare.com"
 
 def set_menu_button(bot_token, bot_name):
     """为Bot设置菜单按钮"""
