@@ -100,34 +100,55 @@ Layer 1: Delegation Layer  → 专家系统
 
 ## 📱 Telegram 集成（NEW!）
 
-**通过 Telegram 实时控制和交互你的 Agent Swarm！**
+**通过 Telegram 实时控制和监控你的 Agent Swarm！**
 
-### 双 Bot 架构
+### 当前实现：主控制 Bot
 
 ```
-主控制 Bot (@openclaw_control_bot)
+主控制 Bot (@ArxchiboSwarm_bot)
     ├─ 创建和管理所有 agents
-    └─ 查看状态和日志
+    ├─ 查看任务状态和日志
+    ├─ 终止任务
+    └─ 清理完成的任务
+```
 
-Agent Bots（每个任务一个）
-    ├─ 实时报告进度
-    ├─ 等待 Plan 确认
-    └─ 接受 steering 指令
+### 可用命令
+
+```
+/spawn <id> <type> <desc>  - 创建 agent (类型: gemini, claude, codex)
+/status                    - 查看任务状态
+/logs <id>                 - 查看日志
+/kill <id>                 - 杀死任务
+/cleanup                   - 清理完成的任务
+/help                      - 显示帮助
 ```
 
 ### 工作流程示例
 
 ```
-你 → 主控制 Bot: "/spawn feat-auth security 实现JWT认证"
+你 → @ArxchiboSwarm_bot: "/spawn feat-auth codex 实现JWT认证"
     ↓
-Agent Bot: "📋 [Plan] 我的实现计划是..."
+Bot: "⚙️ 运行中: ./swarm spawn feat-auth codex ..."
     ↓
-你 → Agent Bot: "确认"
+Bot: "✅ Agent spawned successfully!"
     ↓
-Agent Bot: "⚙️ [Execute] 正在实现..."
+你: "/logs feat-auth"
     ↓
-Agent Bot: "✅ [Done] PR #123 已创建"
+Bot: 显示实时日志...
 ```
+
+### 高级功能（可选）：独立 Agent Bots
+
+如果你想为每个任务创建独立的 Telegram bot（用于更细粒度的控制）：
+
+1. 通过 @BotFather 创建新 bot
+2. 编辑 `.clawdbot/config/telegram-agents.json` 添加 bot token
+3. 使用 `telegram-agent-manager.sh` 管理
+
+这适合需要：
+- 每个任务独立通知渠道
+- 团队多人协作（不同任务不同 bot）
+- 细粒度的任务交互
 
 **详细文档：** [Telegram 集成指南](.clawdbot/TELEGRAM_INTEGRATION.md)
 
@@ -552,3 +573,31 @@ MIT License - 详见 [LICENSE](LICENSE)
 Made with ❤️ by [Arxchibobo](https://github.com/Arxchibobo)
 
 </div>
+
+---
+
+## 🚧 当前实现状态
+
+### ✅ 已完全实现
+- **Agent Swarm 核心** - 完整的 agent 编排系统
+- **Claude Reconstruction 集成** - 5层工程化配置
+- **Ralph Loop V2** - 智能失败分析和重试
+- **Context Manager** - 智能上下文管理（12-20% 使用率）
+- **4步工作流程** - Plan-Confirm-Execute-Deliver
+- **自动监控** - Cron job 每10分钟检查
+- **Mid-Task Steering** - 中途干预和引导
+- **Code Review** - 自动审查系统
+- **Telegram 主控Bot** - @ArxchiboSwarm_bot 实时控制
+- **完整文档** - 所有指南和模板
+
+### ⚙️ 部分实现（可选高级功能）
+- **Telegram Agent Bots** - 架构已设计，需手动配置每个任务的独立 bot
+- **自动 Bot 创建** - 需要 Telegram Bot API 特殊权限
+
+### 📝 使用建议
+- 大多数用户使用主控Bot（@ArxchiboSwarm_bot）即可满足需求
+- 独立 Agent Bots 适合大团队或需要细粒度控制的场景
+- 所有核心功能完全可用且经过测试
+
+---
+
