@@ -74,13 +74,80 @@
         const BUBBLE_INTERVAL = 8000;
         const TYPEWRITER_DELAY = 50;
 
+        function drawOffice() {
+            // 绘制像素风办公室场景
+            const g = game.add.graphics();
+            
+            // 地板
+            g.fillStyle(0x4a5568, 1);
+            g.fillRect(0, 400, 800, 200);
+            
+            // 地板线条（像素风格）
+            g.lineStyle(2, 0x2d3748, 1);
+            for (let i = 0; i < 800; i += 100) {
+                g.lineBetween(i, 400, i, 600);
+            }
+            
+            // 工作桌（左边）
+            g.fillStyle(0x8b4513, 1);
+            g.fillRect(150, 320, 180, 100);
+            g.fillStyle(0xa0522d, 1);
+            g.fillRect(150, 315, 180, 10); // 桌面
+            
+            // 电脑显示器
+            g.fillStyle(0x1a1a1a, 1);
+            g.fillRect(200, 250, 80, 60);
+            g.fillStyle(0x00ff00, 0.3);
+            g.fillRect(205, 255, 70, 50); // 屏幕
+            
+            // 休息区沙发（右边）
+            g.fillStyle(0x4169e1, 1);
+            g.fillRect(580, 150, 140, 60); // 沙发座位
+            g.fillRect(570, 130, 20, 80);  // 左扶手
+            g.fillRect(720, 130, 20, 80);  // 右扶手
+            g.fillRect(580, 120, 140, 15); // 靠背
+            
+            // 台灯（右边）
+            g.fillStyle(0xffd700, 1);
+            g.fillCircle(740, 160, 15); // 灯泡
+            g.lineStyle(4, 0x8b7355, 1);
+            g.lineBetween(740, 175, 740, 210); // 灯杆
+            g.fillStyle(0x8b7355, 1);
+            g.fillRect(730, 210, 20, 5); // 底座
+            
+            // 书架（左上）
+            g.fillStyle(0x654321, 1);
+            g.fillRect(50, 100, 120, 150);
+            g.lineStyle(2, 0x4a2511, 1);
+            for (let i = 0; i < 4; i++) {
+                g.lineBetween(50, 130 + i * 40, 170, 130 + i * 40);
+            }
+            
+            // 窗户（右上）
+            g.fillStyle(0x87ceeb, 0.5);
+            g.fillRect(600, 30, 150, 120);
+            g.lineStyle(3, 0xffffff, 1);
+            g.strokeRect(600, 30, 150, 120);
+            g.lineBetween(675, 30, 675, 150); // 竖线
+            g.lineBetween(600, 90, 750, 90);   // 横线
+            
+            // 区域标记（半透明）
+            g.fillStyle(0xffff00, 0.1);
+            g.fillCircle(260, 340, 60); // 工作区
+            g.fillStyle(0x00ff00, 0.1);
+            g.fillCircle(660, 170, 60); // 休息区
+        }
+
         function preload() {
-            this.load.image('office_bg', '/static/office_bg.png');
+            // 不再需要加载外部图片，我们用代码绘制
         }
 
         function create() {
             game = this;
-            this.add.image(400, 300, 'office_bg');
+            
+            // 绘制办公室背景
+            drawOffice();
+            
             areas = {
                 workdesk: { x: 260, y: 340 },
                 breakroom: { x: 660, y: 170 },
