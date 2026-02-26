@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bobo 办公室 - 调试版</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #2d3561;
+            color: #eee;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .office {
+            background: #16213e;
+            border: 4px solid #e94560;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .avatar {
+            font-size: 80px;
+            margin: 20px 0;
+            animation: bounce 2s ease-in-out infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .state {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0f3460;
+            margin: 15px 0;
+        }
+        .detail {
+            font-size: 16px;
+            color: #aaa;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            background: #16213e;
+            border: 2px solid #533483;
+            border-radius: 10px;
+            height: 30px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #e94560, #533483);
+            height: 100%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        .info {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+        .error {
+            background: rgba(233, 69, 96, 0.2);
+            color: #e94560;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; color: #e94560; margin: 20px 0;">
+            🏢 Bobo 的办公室
+        </h1>
+        
+        <div class="office">
+            <div class="avatar" id="avatar">🤖</div>
+            <div class="state" id="state">加载中...</div>
+            <div class="detail" id="detail">正在连接服务器...</div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress" style="width: 0%">
+                    <span id="progress-text">0%</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info" id="info">
+            📡 状态：等待数据...<br>
+            🕐 更新时间：--<br>
+            🤖 活跃 Agents：--
+        </div>
+        
+        <div id="error-box"></div>
+    </div>
+
+    <script>
+        // API 端点
+        const API_URL = window.location.origin + '/status';
+        
+        // 状态映射
+        const STATE_CONFIG = {
+            idle: { emoji: '🛋️', text: '休息中', color: '#0f3460' },
+            writing: { emoji: '✍️', text: '写作中', color: '#e94560' },
+            researching: { emoji: '🔍', text: '研究中', color: '#533483' },
+            executing: { emoji: '⚙️', text: '执行中', color: '#e94560' },
+            testing: { emoji: '🧪', text: '测试中', color: '#533483' },
+            completed: { emoji: '✅', text: '已完成', color: '#16c79a' },
+            failed: { emoji: '❌', text: '失败', color: '#e94560' },
+            error: { emoji: '⚠️', text: '错误', color: '#e94560' }
+        };
+        
+        // 元素
+        const avatar = document.getElementById('avatar');
+        const stateEl = document.getElementById('state');
+        const detailEl = document.getElementById('detail');
+        const progressBar = document.getElementById('progress');
+        const progressText = document.getElementById('progress-text');
+        const infoBox = document.getElementById('info');
+        const errorBox = document.getElementById('error-box');
+        
+        // 更新UI
+        function updateUI(data) {
+            const state = data.state || 'idle';
+            const config = STATE_CONFIG[state] || STATE_CONFIG.idle;
+            
+            avatar.textContent = config.emoji;
+            stateEl.textContent = config.text;
+            stateEl.style.color = config.color;
+            detailEl.textContent = data.detail || '待命中...';
+            
+            const progress = data.progress || 0;
+            progressBar.style.width = progress + '%';
+            progressText.textContent = progress + '%';
+            
+            const agentCount = data.agent_count || 0;
+            const updatedAt = data.updated_at ? new Date(data.updated_at).toLocaleString('zh-CN') : '--';
+            
+            infoBox.innerHTML = `
+                📡 状态：${config.text}<br>
+                🕐 更新时间：${updatedAt}<br>
+                🤖 活跃 Agents：${agentCount}
+            `;
+        }
+        
+        // 显示错误
+        function showError(msg) {
+            errorBox.innerHTML = `<div class="error">❌ ${msg}</div>`;
+        }
+        
+        // 获取状态
+        async function fetchStatus() {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                const data = await response.json();
+                updateUI(data);
+                errorBox.innerHTML = ''; // 清除错误
+            } catch (err) {
+                showError('连接失败: ' + err.message);
+                console.error('Fetch error:', err);
+            }
+        }
+        
+        // 初始加载
+        fetchStatus();
+        
+        // 定时刷新（每3秒）
+        setInterval(fetchStatus, 3000);
+        
+        // Telegram WebApp初始化
+        if (window.Telegram && window.Telegram.WebApp) {
+            const tg = window.Telegram.WebApp;
+            tg.ready();
+            tg.expand();
+            console.log('Telegram WebApp initialized');
+        }
+    </script>
+</body>
+</html>
