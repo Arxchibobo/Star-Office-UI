@@ -15,4 +15,4 @@ venv/
 state.json
 cloudflared.pid
 cloudflared.out
-frontend/office_bg.png
+# frontend/office_bg.png - Now tracked in git
