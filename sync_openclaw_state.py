@@ -41,16 +41,22 @@ def get_gateway_status():
         
         logs = result.stdout.lower()
         
+        # 忽略 Telegram sendChatAction 这种非关键错误
+        logs_no_sendaction = "\n".join([
+            line for line in logs.split("\n") 
+            if "sendchataction" not in line.lower()
+        ])
+        
         # 分析最近的日志判断状态
-        if "tool" in logs or "exec" in logs or "browser" in logs:
+        if "tool" in logs_no_sendaction or "exec" in logs_no_sendaction or "browser" in logs_no_sendaction:
             return "tool_use"
-        elif "thinking" in logs or "reasoning" in logs:
+        elif "thinking" in logs_no_sendaction or "reasoning" in logs_no_sendaction:
             return "thinking"
-        elif "writing" in logs or "generating" in logs:
+        elif "writing" in logs_no_sendaction or "generating" in logs_no_sendaction:
             return "writing"
-        elif "search" in logs or "fetch" in logs:
+        elif "search" in logs_no_sendaction or "fetch" in logs_no_sendaction:
             return "searching"
-        elif "error" in logs or "failed" in logs:
+        elif "critical error" in logs_no_sendaction or "fatal" in logs_no_sendaction:
             return "error"
         else:
             return "idle"
