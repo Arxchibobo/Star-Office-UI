@@ -75,7 +75,7 @@
         const TYPEWRITER_DELAY = 50;
 
         function preload() {
-            this.load.image('office_bg', '/static/office_bg.png');
+            this.load.image('office_bg', '/static/office_bg_v2.png');
             this.load.image('lobster', '/static/lobster_bright_clean.png');
         }
 
@@ -96,20 +96,52 @@
             star.setOrigin(0.5);
             star.setScale(0.20); // 1408px * 0.20 ≈ 282px，扩大两倍！
             star.setAlpha(0.95);
+            
+            // 添加阴影效果让龙虾更突出
+            const shadow = game.add.ellipse(660, 195, 120, 40, 0x000000, 0.3);
+            shadow.setDepth(-1);
 
-            // 加像素风小牌匾：Bobo的办公室
-            const plaqueBg = game.add.rectangle(400, 570, 380, 40, 0x5d4037);
-            plaqueBg.setStrokeStyle(3, 0x3e2723);
-            const plaqueText = game.add.text(400, 570, 'Bobo的办公室', {
-                font: '18px monospace',
+            // 改进的牌匾：Bobo的办公室
+            // 背景（带渐变效果）
+            const plaqueBg = game.add.rectangle(400, 570, 400, 45, 0x5d4037);
+            plaqueBg.setStrokeStyle(4, 0x3e2723);
+            
+            // 内边框装饰
+            const plaqueInner = game.add.rectangle(400, 570, 380, 35, 0x6d503f, 0);
+            plaqueInner.setStrokeStyle(2, 0x8b6f47);
+            
+            // 文字（加发光效果）
+            const plaqueText = game.add.text(400, 570, '⭐ Bobo的办公室 ⭐', {
+                font: 'bold 20px monospace',
                 fill: '#ffd700',
-                fontWeight: 'bold',
-                stroke: '#000',
-                strokeThickness: 2
+                stroke: '#ff8800',
+                strokeThickness: 1,
+                shadow: {
+                    offsetX: 0,
+                    offsetY: 0,
+                    color: '#ffaa00',
+                    blur: 8,
+                    fill: true
+                }
             }).setOrigin(0.5);
-            // 牌匾两边加个小装饰
-            game.add.text(230, 570, '⭐', { font: '20px' }).setOrigin(0.5);
-            game.add.text(570, 570, '⭐', { font: '20px' }).setOrigin(0.5);
+            
+            // 添加环境光效粒子（轻微的光点漂浮）
+            for (let i = 0; i < 8; i++) {
+                const x = Phaser.Math.Between(50, 750);
+                const y = Phaser.Math.Between(50, 500);
+                const particle = game.add.circle(x, y, 2, 0xffffff, 0.3);
+                
+                // 轻微的上下浮动动画
+                game.tweens.add({
+                    targets: particle,
+                    y: y + Phaser.Math.Between(-30, 30),
+                    alpha: Phaser.Math.FloatBetween(0.1, 0.4),
+                    duration: Phaser.Math.Between(3000, 5000),
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+            }
 
             statusText = document.getElementById('status-text');
             fetchStatus();
