@@ -76,7 +76,7 @@
 
         function preload() {
             this.load.image('office_bg', '/static/office_bg_800x600_final.png');
-            this.load.image('lobster', '/static/lobster_bright_clean.png');
+            this.load.image('lobster', '/static/lobster_final.png');
         }
 
         function create() {
@@ -85,32 +85,33 @@
             // 显示AI生成的精美办公室背景图（已裁剪为 800x600）
             this.add.image(400, 300, 'office_bg');
             
-            // 根据新背景图调整区域坐标（800x600画布）
+            // 根据 800x600 底图布局设定区域坐标
+            // 提示：如需调试，将 DEBUG_AREAS 改为 true 可看到区域标记
             areas = {
-                workdesk: { x: 200, y: 280 },    // 办公桌区域（左侧）
-                breakroom: { x: 500, y: 320 },   // 休息沙发区（中央）
-                alert: { x: 400, y: 450 }        // 警告区（中下方）
+                workdesk: { x: 180, y: 280 },    // 办公桌区域（左侧）
+                breakroom: { x: 450, y: 320 },   // 沙发休息区（中央偏右）
+                alert: { x: 400, y: 480 }        // 警告区（下方空地）
             };
             
-            // 可选：显示区域标记（调试用，生产环境可删除）
-            const DEBUG_AREAS = false; // 改为true可看到区域标记
+            // 可选：显示区域标记（调试用）
+            const DEBUG_AREAS = true; // 改为 true 可看到红色圆圈标记
             if (DEBUG_AREAS) {
                 Object.keys(areas).forEach(key => {
                     const area = areas[key];
-                    const marker = game.add.circle(area.x, area.y, 30, 0xff0000, 0.3);
+                    const marker = game.add.circle(area.x, area.y, 35, 0xff0000, 0.4);
                     const label = game.add.text(area.x, area.y, key, {
-                        font: '12px Arial',
+                        font: 'bold 12px Arial',
                         fill: '#ffffff',
                         stroke: '#000000',
-                        strokeThickness: 2
+                        strokeThickness: 3
                     }).setOrigin(0.5);
                 });
             }
 
-            // 创建龙虾角色（鲜艳醒目，扩大两倍）
-            star = game.physics.add.sprite(500, 320, 'lobster');
+            // 创建龙虾角色（匹配底图风格）
+            star = game.physics.add.sprite(450, 320, 'lobster');
             star.setOrigin(0.5);
-            star.setScale(0.20);
+            star.setScale(0.07); // 1024px * 0.07 ≈ 72px，合适的角色大小
             star.setAlpha(0.95);
             
             // 添加阴影效果（存储为全局变量以便跟随龙虾移动）
