@@ -76,6 +76,7 @@
 
         function preload() {
             this.load.image('office_bg', '/static/office_bg.png');
+            this.load.image('lobster', '/static/lobster_sprite.png');
         }
 
         function create() {
@@ -90,29 +91,10 @@
                 alert: { x: 620, y: 490 }
             };
 
-            // 创建 Star 角色（睁眼 + 闭眼两个纹理）
-            const graphicsOpen = game.make.graphics();
-            graphicsOpen.fillStyle(0xff6b35, 1);
-            graphicsOpen.fillRect(10, 10, 12, 12);
-            graphicsOpen.fillStyle(0xffffff, 1);
-            graphicsOpen.fillRect(13, 13, 3, 3);
-            graphicsOpen.fillRect(16, 13, 3, 3);
-            graphicsOpen.fillStyle(0x000000, 1);
-            graphicsOpen.fillRect(14, 14, 1, 1);
-            graphicsOpen.fillRect(17, 14, 1, 1);
-            graphicsOpen.generateTexture('star_open', 24, 24);
-
-            const graphicsClosed = game.make.graphics();
-            graphicsClosed.fillStyle(0xff6b35, 1);
-            graphicsClosed.fillRect(10, 10, 12, 12);
-            graphicsClosed.fillStyle(0x000000, 1);
-            graphicsClosed.fillRect(13, 14, 3, 1);
-            graphicsClosed.fillRect(16, 14, 3, 1);
-            graphicsClosed.generateTexture('star_closed', 24, 24);
-
-            star = game.physics.add.sprite(660, 170, 'star_open');
+            // 创建龙虾角色（使用AI生成的精美图片）
+            star = game.physics.add.sprite(660, 170, 'lobster');
             star.setOrigin(0.5);
-            star.setScale(1.8);
+            star.setScale(0.8); // 调整大小适配场景
             star.setAlpha(0.95);
 
             // 加像素风小牌匾：Bobo的办公室
@@ -136,11 +118,11 @@
         function update(time) {
             if (time - lastFetch > FETCH_INTERVAL) { fetchStatus(); lastFetch = time; }
 
-            // 眨眼
+            // 眨眼（用透明度变化模拟）
             if (time - lastBlink > BLINK_INTERVAL) {
-                star.setTexture('star_closed');
+                star.setAlpha(0.3);
                 lastBlink = time;
-                setTimeout(() => { star.setTexture('star_open'); }, 150);
+                setTimeout(() => { star.setAlpha(0.95); }, 150);
             }
 
             // 冒气泡
