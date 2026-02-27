@@ -75,14 +75,14 @@
         const TYPEWRITER_DELAY = 50;
 
         function preload() {
-            this.load.image('office_bg', '/static/office_bg_v2.png');
+            this.load.image('office_bg', '/static/office_bg_800x600_final.png');
             this.load.image('lobster', '/static/lobster_bright_clean.png');
         }
 
         function create() {
             game = this;
             
-            // 显示AI生成的精美办公室背景图
+            // 显示AI生成的精美办公室背景图（已裁剪为 800x600）
             this.add.image(400, 300, 'office_bg');
             
             // 根据新背景图调整区域坐标（800x600画布）
