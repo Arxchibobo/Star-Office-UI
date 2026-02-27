@@ -85,21 +85,37 @@
             // 显示AI生成的精美办公室背景图
             this.add.image(400, 300, 'office_bg');
             
+            // 根据新背景图调整区域坐标（800x600画布）
             areas = {
-                workdesk: { x: 260, y: 340 },
-                breakroom: { x: 660, y: 170 },
-                alert: { x: 620, y: 490 }
+                workdesk: { x: 200, y: 280 },    // 办公桌区域（左侧）
+                breakroom: { x: 500, y: 320 },   // 休息沙发区（中央）
+                alert: { x: 400, y: 450 }        // 警告区（中下方）
             };
+            
+            // 可选：显示区域标记（调试用，生产环境可删除）
+            const DEBUG_AREAS = false; // 改为true可看到区域标记
+            if (DEBUG_AREAS) {
+                Object.keys(areas).forEach(key => {
+                    const area = areas[key];
+                    const marker = game.add.circle(area.x, area.y, 30, 0xff0000, 0.3);
+                    const label = game.add.text(area.x, area.y, key, {
+                        font: '12px Arial',
+                        fill: '#ffffff',
+                        stroke: '#000000',
+                        strokeThickness: 2
+                    }).setOrigin(0.5);
+                });
+            }
 
             // 创建龙虾角色（鲜艳醒目，扩大两倍）
-            star = game.physics.add.sprite(660, 170, 'lobster');
+            star = game.physics.add.sprite(500, 320, 'lobster');
             star.setOrigin(0.5);
-            star.setScale(0.20); // 1408px * 0.20 ≈ 282px，扩大两倍！
+            star.setScale(0.20);
             star.setAlpha(0.95);
             
-            // 添加阴影效果让龙虾更突出
-            const shadow = game.add.ellipse(660, 195, 120, 40, 0x000000, 0.3);
-            shadow.setDepth(-1);
+            // 添加阴影效果（存储为全局变量以便跟随龙虾移动）
+            window.lobsterShadow = game.add.ellipse(500, 345, 120, 40, 0x000000, 0.3);
+            window.lobsterShadow.setDepth(-1);
 
             // 改进的牌匾：Bobo的办公室
             // 背景（带渐变效果）
@@ -230,6 +246,12 @@
             if (Math.abs(dy) > 3) star.y += Math.sign(dy) * speed;
             if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
                 star.setY(star.y + wobble);
+            }
+            
+            // 让阴影跟随龙虾移动
+            if (window.lobsterShadow) {
+                window.lobsterShadow.x = star.x;
+                window.lobsterShadow.y = star.y + 25; // 偏移到底部
             }
         }
 
