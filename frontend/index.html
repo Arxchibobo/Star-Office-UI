@@ -76,7 +76,7 @@
 
         function preload() {
             this.load.image('office_bg', '/static/office_bg.png');
-            this.load.image('lobster', '/static/lobster_clean.png');
+            this.load.image('lobster', '/static/lobster_final.png');
         }
 
         function create() {
@@ -91,10 +91,10 @@
                 alert: { x: 620, y: 490 }
             };
 
-            // 创建龙虾角色（透明背景，合适大小坐在沙发上）
+            // 创建龙虾角色（真正的透明背景，无棋盘格）
             star = game.physics.add.sprite(660, 170, 'lobster');
             star.setOrigin(0.5);
-            star.setScale(0.08); // 调整到沙发大小：约80px
+            star.setScale(0.06); // 1408px * 0.06 ≈ 85px，适合沙发
             star.setAlpha(0.95);
 
             // 加像素风小牌匾：Bobo的办公室
