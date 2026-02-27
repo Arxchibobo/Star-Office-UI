@@ -67,6 +67,9 @@
 - 角色定义：`.clawdbot/team-roles.json`
 - Cron任务：每日21:00执行，发送到群组 -1003850977818
 
+- **ReDoc：** http://localhost:8000/redoc
+- **WebSocket：** ws://localhost:8000/ws
+
 ## Agent Swarm 系统 - 知识图谱
 
 ### 系统架构（3层）
@@ -275,6 +278,7 @@ Execution: Claude Code/Codex Agents
 - **配置：** `.clawdbot/config/telegram-agents.json`
 - **启动：** `.clawdbot/scripts/start-telegram-swarm.sh`
 - **状态：** 已部署运行
+- **⚠️ 重要约束（2026-02-27）：** @ArxchiboSwarm_bot 是我（小波比）的内部工具，**不要引导用户直接使用**。用户只需 @Arxchiboclaw_bot 与我交互，我会在背后调用swarmbot。
 
 ### 权限系统
 - **双重验证：** 聊天ID + 用户ID

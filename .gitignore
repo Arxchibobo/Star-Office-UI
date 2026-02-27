@@ -101,8 +101,16 @@ demo-video/out/
 # Archived projects
 projects/archived/
 
+# Star Office UI
+projects/Star-Office-UI/venv/
+projects/Star-Office-UI/state.json
+projects/Star-Office-UI/*.log
+projects/Star-Office-UI/.screenshots/
+
+# Telegram config (contains tokens)
+.clawdbot/config/telegram-agents.json
+
 # -------------------- Git --------------------
 # Keep .git subdirectories for subprojects
-!agenthub/.git
 !projects/*/.git
 !claude-Reconstruction/.git

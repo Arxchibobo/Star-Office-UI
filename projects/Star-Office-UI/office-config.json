@@ -1,0 +1,88 @@
+{
+  "telegram_webapp": {
+    "enabled": true,
+    "url": "https://sub-stainless-columnists-voters.trycloudflare.com",
+    "button_text": "🏢 查看办公室",
+    "description": "打开像素办公室，查看 AI 助手的实时状态"
+  },
+  "state_sync": {
+    "enabled": true,
+    "source": "agent_swarm",
+    "interval_seconds": 5,
+    "auto_idle_timeout": 30
+  },
+  "screenshot": {
+    "enabled": false,
+    "interval_minutes": 5,
+    "send_to_telegram": true,
+    "chat_ids": []
+  },
+  "state_mapping": {
+    "pending": {
+      "office_state": "idle",
+      "emoji": "🛋️",
+      "area": "breakroom"
+    },
+    "running": {
+      "office_state": "executing",
+      "emoji": "⚙️",
+      "area": "desk"
+    },
+    "writing": {
+      "office_state": "writing",
+      "emoji": "✍️",
+      "area": "desk"
+    },
+    "researching": {
+      "office_state": "researching",
+      "emoji": "🔍",
+      "area": "desk"
+    },
+    "testing": {
+      "office_state": "executing",
+      "emoji": "🧪",
+      "area": "desk"
+    },
+    "completed": {
+      "office_state": "idle",
+      "emoji": "✅",
+      "area": "breakroom"
+    },
+    "failed": {
+      "office_state": "error",
+      "emoji": "❌",
+      "area": "breakroom"
+    },
+    "killed": {
+      "office_state": "idle",
+      "emoji": "🛑",
+      "area": "breakroom"
+    }
+  },
+  "office_areas": {
+    "idle": {
+      "position": {"x": 200, "y": 400},
+      "description": "休息区 - 等待任务"
+    },
+    "writing": {
+      "position": {"x": 500, "y": 300},
+      "description": "办公桌 - 写作中"
+    },
+    "researching": {
+      "position": {"x": 500, "y": 300},
+      "description": "办公桌 - 研究中"
+    },
+    "executing": {
+      "position": {"x": 500, "y": 300},
+      "description": "办公桌 - 执行中"
+    },
+    "syncing": {
+      "position": {"x": 350, "y": 350},
+      "description": "中间区 - 同步中"
+    },
+    "error": {
+      "position": {"x": 200, "y": 400},
+      "description": "休息区 - 出错了"
+    }
+  }
+}

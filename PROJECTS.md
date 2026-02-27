@@ -30,81 +30,52 @@ OpenClaw 工作空间中的所有项目和子项目概览。
 
 ---
 
-### 2. AgentHub (agenthub/)
+### 2. Star Office UI (projects/Star-Office-UI/)
 
-**状态**: 🔨 开发中（后端就绪）  
-**大小**: 80M  
-**描述**: AI Agent 社交平台 - GitHub 风格的 Agent 任务市场
+**状态**: ✅ 生产就绪  
+**大小**: ~15M  
+**描述**: 像素风格办公室可视化 - 实时展示 AI Assistant 工作状态
 
 **核心功能**:
-- Agent Profile 和技能展示
-- 任务发布和分配系统
-- 实时 Feed 动态流
-- WebSocket 实时通信
-- 积分和声誉系统
-- 与 Agent Swarm 深度集成
+- Telegram WebApp 集成
+- 实时状态同步（Agent Swarm）
+- 像素风格动画
+- 状态映射和可视化
+- 截图推送到 Telegram
 
 **技术栈**:
-- 后端: FastAPI, PostgreSQL, SQLAlchemy, Redis, Celery
-- 前端: React 18, TypeScript, Vite, TailwindCSS
-- DevOps: Docker, Kubernetes, GitHub Actions
+- 后端: Flask, Flask-CORS
+- 前端: Phaser 3 (游戏引擎) + Vanilla JS
+- 集成: Playwright (截图)
 
 **文档**:
-- [README.md](agenthub/README.md)
-- [BACKEND_READY.md](agenthub/BACKEND_READY.md)
-- [架构文档](agenthub/docs/project-arch/ARCHITECTURE.md)
-- [API 规范](agenthub/docs/project-arch/API_SPEC.md)
-- [数据库设计](agenthub/docs/project-arch/DB_SCHEMA.md)
+- [STAR_OFFICE_INTEGRATION.md](projects/Star-Office-UI/STAR_OFFICE_INTEGRATION.md)
+- [README.md](projects/Star-Office-UI/README.md)
 
-**入口**: `agenthub/run.sh`
+**入口**: `projects/Star-Office-UI/start.sh`
+
+**WebApp URL**: https://showtimes-lyric-titanium-sale.trycloudflare.com/debug
 
 ---
 
-### 3. ClawProduct Hunt (projects/clawproduct-hunt/)
+### 3. Telegram Subagent Hooks (projects/telegram-subagent-hooks/)
 
-**状态**: ✅ 前端就绪  
-**大小**: 14M  
-**描述**: Product Hunt 克隆 - AI Agent 产品发现平台
-
-**核心功能**:
-- 产品展示和投票
-- 分类浏览
-- 搜索和过滤
-- 用户评论和互动
-
-**技术栈**:
-- 后端: FastAPI, SQLite
-- 前端: React, Vite
-
-**文档**:
-- [README.md](projects/clawproduct-hunt/README.md)
-- [FRONTEND_READY.md](projects/clawproduct-hunt/FRONTEND_READY.md)
-- [QUICKSTART.md](projects/clawproduct-hunt/QUICKSTART.md)
-
-**入口**: `projects/clawproduct-hunt/start.sh`
-
-**仓库**: 独立 Git 仓库（有 .git/）
-
----
-
-### 4. Telegram Subagent Hooks (projects/telegram-subagent-hooks/)
-
-**状态**: 🔨 开发中  
+**状态**: 🔨 开发中（架构完成）  
 **大小**: 436K  
-**描述**: Telegram 子 Agent 系统 - 自动响应和任务派发
+**描述**: Telegram 子 Agent 系统 - 持久化线程绑定的 Agent Sessions
 
 **核心功能**:
-- Telegram bot 集成
-- 子 Agent 自动生成
-- 任务队列管理
-- 状态监控和通知
+- Telegram Forum Topics 作为线程
+- 子 Agent 自动生成和绑定
+- 任务状态监控
+- 实时消息通知
 
 **技术栈**: TypeScript, Node.js, Telegram Bot API
 
 **文档**:
 - [README.md](projects/telegram-subagent-hooks/README.md)
-- [DEPLOYMENT.md](projects/telegram-subagent-hooks/DEPLOYMENT.md)
 - [DEV_PLAN.md](projects/telegram-subagent-hooks/DEV_PLAN.md)
+- [NEXT_STEPS.md](projects/telegram-subagent-hooks/NEXT_STEPS.md)
 
 **入口**: `npm start`
 
@@ -112,7 +83,7 @@ OpenClaw 工作空间中的所有项目和子项目概览。
 
 ---
 
-### 5. Claude Reconstruction (claude-Reconstruction/)
+### 4. Claude Reconstruction (claude-Reconstruction/)
 
 **状态**: ✅ 生产就绪  
 **大小**: 616K  
@@ -132,27 +103,6 @@ OpenClaw 工作空间中的所有项目和子项目概览。
 - [CONTEXT_MANAGER.md](claude-Reconstruction/CONTEXT_MANAGER.md)
 
 **仓库**: 独立 Git 仓库（有 .git/）
-
----
-
-## 🗄️ Archived Projects
-
-### 1. Demo Video (projects/archived/demo-video/)
-
-**状态**: 📦 归档  
-**大小**: 406M  
-**描述**: Remotion 视频生成演示项目
-
-**原因**: 演示完成，暂不维护  
-**优化**: 可删除 node_modules/ 和 out/ 节省 ~380M
-
----
-
-### 2. Temporary Files (projects/archived/tmp/)
-
-**状态**: 📦 归档  
-**大小**: 8K  
-**描述**: 临时文件和测试输出
 
 ---
 
@@ -176,21 +126,20 @@ OpenClaw 工作空间中的所有项目和子项目概览。
 
 | 类型 | 数量 | 总大小 | 占比 |
 |------|------|--------|------|
-| 活跃项目 | 5 | ~280M | 31.9% |
-| 归档项目 | 2 | ~414M | 47.1% |
-| Skills | 3 | 228K | 0.03% |
-| 文档/资源 | - | ~184M | 21.0% |
-| **总计** | **10** | **~878M** | **100%** |
+| 活跃项目 | 4 | ~205M | 94.5% |
+| Skills | 3 | 228K | 0.1% |
+| 文档/配置 | - | ~12M | 5.4% |
+| **总计** | **7** | **~217M** | **100%** |
 
 ### 技术栈分布
 
 | 语言/框架 | 项目数 |
 |-----------|--------|
-| Python | 5 |
-| TypeScript/JavaScript | 4 |
-| Bash | 3 |
-| React | 3 |
-| FastAPI | 2 |
+| Python | 3 |
+| TypeScript/JavaScript | 2 |
+| Bash | 2 |
+| Flask | 1 |
+| Phaser 3 | 1 |
 
 ---
 
@@ -199,39 +148,38 @@ OpenClaw 工作空间中的所有项目和子项目概览。
 ### 高优先级（核心功能）
 
 1. **Agent Swarm System** - 基础设施，所有项目依赖
-2. **AgentHub** - 主要产品，开发中
+2. **Star Office UI** - 实时可视化，已部署
 
 ### 中优先级（实验性）
 
-3. **ClawProduct Hunt** - 独立产品，前端已完成
-4. **Telegram Subagent Hooks** - 集成功能，开发中
+3. **Telegram Subagent Hooks** - 集成功能，开发中
 
 ### 低优先级（支持性）
 
-5. **Claude Reconstruction** - 工程化工具，稳定维护
-6. **Skills** - 按需开发
+4. **Claude Reconstruction** - 工程化工具，稳定维护
+5. **Skills** - 按需开发
 
 ---
 
 ## 🚀 启动所有项目
 
-### 一键启动脚本（TODO）
+### 一键启动脚本
 
 ```bash
-# scripts/start-all.sh
 #!/bin/bash
+# scripts/start-all.sh
 
-# Agent Swarm
-tmux new-session -d -s swarm "cd ~/.openclaw/workspace && ./.clawdbot/scripts/swarm monitor"
+# Agent Swarm 监控
+tmux new-session -d -s workspace "cd ~/.openclaw/workspace && watch -n 10 './swarm status'"
 
-# AgentHub
-tmux new-window -t swarm -n agenthub "cd agenthub && ./run.sh"
+# Star Office UI
+tmux new-window -t workspace -n office "cd projects/Star-Office-UI && ./start.sh"
 
-# Telegram Hooks
-tmux new-window -t swarm -n telegram "cd projects/telegram-subagent-hooks && npm start"
+# Telegram Bot（如果需要）
+tmux new-window -t workspace -n telegram "cd ~/.openclaw/workspace/.clawdbot/scripts && python telegram-main-bot.py"
 
-echo "All services started in tmux session 'swarm'"
-tmux attach -t swarm
+echo "✅ All services started in tmux session 'workspace'"
+tmux attach -t workspace
 ```
 
 ---
@@ -239,25 +187,24 @@ tmux attach -t swarm
 ## 📝 项目依赖关系
 
 ```
-┌─────────────────────────┐
-│   AgentHub Platform     │  ← 主产品
-│   (User Interface)      │
-└───────────┬─────────────┘
-            │ 调用
-            ▼
-┌─────────────────────────┐
-│   Agent Swarm System    │  ← 核心引擎
-│   (Orchestration)       │
-└───────────┬─────────────┘
-            │ 使用
-            ▼
-┌─────────────────────────┐
-│  Claude Reconstruction  │  ← 工程化规则
-│  (Prompt Engineering)   │
-└─────────────────────────┘
+┌──────────────────────────┐
+│   Star Office UI         │  ← 可视化界面
+│   (Telegram WebApp)      │
+└────────────┬─────────────┘
+             │ 展示状态
+             ▼
+┌──────────────────────────┐
+│   Agent Swarm System     │  ← 核心引擎
+│   (Orchestration)        │
+└────────────┬─────────────┘
+             │ 使用规则
+             ▼
+┌──────────────────────────┐
+│  Claude Reconstruction   │  ← 工程化规则
+│  (Prompt Engineering)    │
+└──────────────────────────┘
 
 并行独立项目：
-- ClawProduct Hunt
 - Telegram Subagent Hooks
 - Skills (可插拔模块)
 ```
@@ -267,19 +214,20 @@ tmux attach -t swarm
 ## 🔗 相关链接
 
 - **主仓库**: https://github.com/Arxchibobo/openclaw-arxchibo
-- **AgentHub**: (待发布)
-- **ClawProduct Hunt**: (待发布)
 - **Claude Reconstruction**: https://github.com/Arxchibobo/claude-Reconstruction
+- **Telegram Subagent Hooks**: 独立仓库（项目内）
+- **Star Office UI WebApp**: https://showtimes-lyric-titanium-sale.trycloudflare.com/debug
 
 ---
 
 ## 📞 维护者
 
 - **Arxchibobo** - 所有项目
-- **OpenClaw Agent** - 自动化维护和监控
+- **OpenClaw Agent (小波比)** - 自动化维护和监控
 
 ---
 
 **最后更新**: 2026-02-26  
-**总项目数**: 10 (5 活跃 + 2 归档 + 3 skills)  
-**工作空间大小**: ~878M
+**总项目数**: 7 (4 活跃 + 3 skills)  
+**工作空间大小**: ~217M  
+**完成度**: 98%

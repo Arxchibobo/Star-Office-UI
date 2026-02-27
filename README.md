@@ -6,8 +6,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub Stars](https://img.shields.io/github/stars/Arxchibobo/openclaw-arxchibo?style=social)](https://github.com/Arxchibobo/openclaw-arxchibo)
-[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)]()
-[![Status](https://img.shields.io/badge/workspace-organized-brightgreen.svg)]()
+[![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)]()
+[![Status](https://img.shields.io/badge/workspace-production-brightgreen.svg)]()
 
 [系统概览](#-系统概览) •
 [项目列表](#-项目列表) •
@@ -21,385 +21,374 @@
 
 ## 📖 简介
 
-这是 **Arxchibobo** 的 OpenClaw 工作空间，包含 AI Agent 编排系统、多个活跃项目和完整的工程化配置。
+这是 **Arxchibobo** 的 OpenClaw 工作空间，包含 AI Agent 编排系统、实时可视化UI和完整的工程化配置。
 
 ### ✨ 工作空间特点
 
 - 🏗️ **清晰的目录结构** - 逻辑分层，易于维护
 - 🤖 **Agent Swarm 系统** - 智能AI代理编排
-- 📁 **多项目管理** - 统一管理多个子项目
+- 🎨 **Star Office UI** - 实时可视化工作状态
+- 📱 **Telegram 集成** - 移动端远程控制
 - 🔧 **完整工具链** - Claude Reconstruction + 自定义脚本
 - 📚 **丰富文档** - 每个系统都有完整文档
-- 🔒 **安全配置** - 完善的 .gitignore 和密钥保护
 
 ---
 
 ## 📊 系统概览
 
-### 工作空间结构 (v2.0)
+### 工作空间结构 (v2.1)
 
 ```
 ~/.openclaw/workspace/
 ├── 📁 projects/               # 子项目集合 ⭐
-│   ├── clawproduct-hunt/      # AgentHub - AI社交平台
+│   ├── Star-Office-UI/        # 像素办公室可视化
 │   └── telegram-subagent-hooks/ # Telegram集成钩子
 ├── 📁 .clawdbot/              # Agent Swarm 核心系统 ⭐
 │   ├── config/                # 配置文件
-│   ├── scripts/               # 编排脚本（17个）
+│   ├── scripts/               # 编排脚本（18个）
 │   ├── logs/                  # 运行日志
 │   └── active-tasks.json      # 任务注册表
-├── 📁 agenthub/               # AgentHub 后端独立部署
 ├── 📁 claude-Reconstruction/  # 工程化AI配置
 ├── 📁 skills/                 # OpenClaw 技能库
 ├── 📁 memory/                 # 记忆系统（YYYY-MM-DD.md）
-├── 📁 assets/                 # 资源文件 ⭐
-│   ├── images/                # 图片归档
-│   └── temp/                  # 临时文件
-├── 📁 docs/                   # 文档归档 ⭐
-│   └── archived/              # 历史文档
+├── 📁 assets/                 # 资源文件
+├── 📁 docs/                   # 文档归档
 ├── 📄 MEMORY.md               # 长期记忆
 ├── 📄 AGENTS.md               # Agent 行为规范
 ├── 📄 SOUL.md                 # 核心价值观
 ├── 📄 TOOLS.md                # 工具配置
 ├── 📄 PROJECTS.md             # 项目总览 ⭐
-└── 📄 WORKSPACE_REPORT.md     # 工作空间整理报告 ⭐
+└── 📄 swarm                   # Agent Swarm CLI ⭐
 ```
-
-### 关键改进 (v2.0.0)
-
-| 改进项 | 优化前 | 优化后 | 提升 |
-|-------|--------|--------|------|
-| 根目录文件数 | 27 | 17 | ⬇️ **37%** |
-| .gitignore规则 | 37行 | 95行 | ⬆️ **157%** |
-| 目录组织 | 分散 | 分层 | ✅ **清晰** |
-| 资源管理 | 零散 | 归档 | ✅ **集中** |
-| 文档完整度 | 中等 | 完善 | ✅ **提升** |
 
 ---
 
 ## 🚀 项目列表
 
-### 活跃项目
+### 1. Agent Swarm System ⭐⭐⭐
 
-#### 1. **clawproduct-hunt** (AgentHub) ⭐
-**位置**: `projects/clawproduct-hunt/`  
-**描述**: AI Agent 社交平台与技能市场  
-**状态**: ✅ Production Ready (v1.2.0)  
-**技术栈**: FastAPI, SQLAlchemy, WebSocket, Vanilla JS, Tailwind CSS  
-**大小**: ~80 MB
+**核心编排引擎**
 
-**特性**:
-- 多Agent协作和社交网络
-- 实时Feed动态
-- 任务发布与分配
-- 暗黑模式、搜索筛选
-- 19个自动化测试
-- 完整安全防护
+- 双层 AI 架构（编排层 + 执行层）
+- Ralph Loop V2 智能重试
+- Worktree 隔离和 tmux 会话管理
+- Telegram 远程控制
+- 自动代码审查
+
+**快速开始**:
+```bash
+cd ~/.openclaw/workspace
+./swarm spawn            # 创建 agent
+./swarm status           # 查看状态
+./swarm logs <task-id>   # 查看日志
+```
+
+**文档**: [.clawdbot/README.md](.clawdbot/README.md)
+
+---
+
+### 2. Star Office UI ⭐⭐
+
+**实时可视化工作状态**
+
+- Telegram WebApp 集成
+- 像素风格动画（Phaser 3）
+- 实时状态同步
+- Agent 工作状态展示
+
+**访问**: https://showtimes-lyric-titanium-sale.trycloudflare.com/debug
 
 **启动**:
 ```bash
-cd projects/clawproduct-hunt
-./setup.sh dev
-# 访问 http://localhost:8000
+cd projects/Star-Office-UI
+./start.sh
 ```
 
-#### 2. **telegram-subagent-hooks**
-**位置**: `projects/telegram-subagent-hooks/`  
-**描述**: Telegram Bot 与 Agent Swarm 集成钩子  
-**状态**: 🔄 开发中  
-**技术栈**: Python, pyTelegramBotAPI  
-**大小**: ~100 KB
-
-#### 3. **agenthub** (独立部署)
-**位置**: `agenthub/`  
-**描述**: AgentHub 后端独立实例  
-**状态**: ✅ 就绪  
-**大小**: ~80 MB
-
-### 归档项目
-
-#### demo-video
-**位置**: `projects/archived/demo-video/`  
-**描述**: 视频演示项目  
-**状态**: 📦 已归档  
-**大小**: ~406 MB (可优化至 26MB)
+**文档**: [projects/Star-Office-UI/STAR_OFFICE_INTEGRATION.md](projects/Star-Office-UI/STAR_OFFICE_INTEGRATION.md)
 
 ---
 
-## 🤖 Agent Swarm 系统
+### 3. Telegram Integration
 
-### 核心理念
+**移动端控制中心**
 
-Agent Swarm 是一个基于 [Elvis Sun 的架构](https://x.com/elvissun/status/2025920521871716562) 和 [Claude Reconstruction](https://github.com/Arxchibobo/claude-Reconstruction) 的 AI Agent 编排系统。
+两个 Bot 已配置：
+- **ArxchiboSwarm_bot** - Agent Swarm 主控制
+- **boboclawbot** - OpenClaw 集成
 
-### 三层架构
-
+**可用命令**:
 ```
-Layer 1: 编排层 (Orchestrator)
-  ↓ 读取业务上下文，决策任务优先级
-Layer 2: Agent Swarm (编排层)
-  ↓ 生成、监控、重试 agents
-Layer 3: Claude Reconstruction (5层工程化配置)
-  ↓ 智能上下文、工作流程、规则引擎
-Execution: Claude Code/Codex Agents
-  ↓ 高质量代码产出
+/spawn <id> <type> <desc>  - 创建 agent
+/status                     - 查看状态
+/logs <id>                  - 查看日志
+/kill <id>                  - 终止任务
+/cleanup                    - 清理完成任务
 ```
 
-### 关键特性
+**文档**: [.clawdbot/TELEGRAM_INTEGRATION.md](.clawdbot/TELEGRAM_INTEGRATION.md)
 
-1. **Ralph Loop V2** - 智能重试
-   - 失败 → 分析原因 → 重写 prompt → 重试
-   - 不是无脑重复相同 prompt
+---
 
-2. **Context Manager** - 智能加载
-   - 只加载需要的文档（12-20% vs 60%+）
-   - 根据任务类型自动选择
+### 4. Claude Reconstruction
 
-3. **4步工作流程** - 专业行为
-   - Plan → Confirm → Execute → Deliver
-   - 强制流程，不跳步
+**工程化 AI 开发框架**
 
-4. **5层质量保证**
-   - Layer 5: Context Manager (智能加载)
-   - Layer 4: Workflow Engine (强制流程)
-   - Layer 3: Rules Engine (编码规范)
-   - Layer 2: Hook Layer (质量门控)
-   - Layer 1: Delegation Layer (专家系统)
+- 上下文优化（60% → 12-20%）
+- 规则化 Prompt 系统
+- 4 步工作流程
+- 自动能力进化
 
-### 快速使用
-
-#### 创建普通 Agent
+**启动**:
 ```bash
 cd ~/.openclaw/workspace
-./swarm spawn
+./start-claude-code.sh api  # 指定任务类型
 ```
 
-#### 创建工程化 Agent（推荐）
-```bash
-./swarm spawn-eng
-# 选择任务类型: api, frontend, testing, security, coding
-```
-
-#### 管理任务
-```bash
-./swarm status      # 查看状态
-./swarm logs <id>   # 查看日志
-./swarm steer <id> "新指令"  # 引导方向
-./swarm kill <id>   # 杀死任务
-./swarm cleanup     # 清理完成的任务
-```
-
-### 脚本工具
-
-| 脚本 | 功能 | 位置 |
-|------|------|------|
-| `swarm` | 主控制脚本 | `.clawdbot/scripts/swarm` |
-| `agent-control.sh` | 小波比专用控制 | `.clawdbot/scripts/agent-control.sh` |
-| `spawn-for-bobi.sh` | 非交互式spawn | `.clawdbot/scripts/spawn-for-bobi.sh` |
-| `telegram-main-bot.py` | Telegram Bot | `.clawdbot/scripts/telegram-main-bot.py` |
+**文档**: [claude-Reconstruction/README.md](claude-Reconstruction/README.md)
 
 ---
 
-## 🔧 Claude Reconstruction 集成
+## 🎯 Agent Swarm 系统
 
-### 什么是 Claude Reconstruction？
+### 核心概念
 
-一个5层工程化配置系统，让 Claude（或任何 AI coding assistant）像 senior engineer 一样工作。
+```
+┌─────────────────────────────┐
+│  我 / OpenClaw (最高编排层)  │
+│  - 业务决策                  │
+│  - 优先级管理                │
+└───────────┬─────────────────┘
+            │
+            ▼
+┌─────────────────────────────┐
+│  Agent Swarm (编排层)        │
+│  - 生成 agents               │
+│  - 监控进度                  │
+│  - Ralph Loop V2 重试        │
+└───────────┬─────────────────┘
+            │
+            ▼
+┌─────────────────────────────┐
+│  Claude Reconstruction       │
+│  (5层工程化配置)              │
+│  - Context Manager           │
+│  - Workflow Engine           │
+│  - Rules Engine              │
+└───────────┬─────────────────┘
+            │
+            ▼
+┌─────────────────────────────┐
+│  Execution Layer             │
+│  - Claude Code / Codex       │
+│  - 高质量代码产出             │
+└─────────────────────────────┘
+```
 
-### 核心配置
+### 工作流程
 
-**位置**: `claude-Reconstruction/`
+1. **创建 Agent**
+   ```bash
+   ./swarm spawn-eng
+   ```
+   
+2. **监控进度**
+   ```bash
+   ./swarm status
+   # 或在 Telegram 中使用 /status
+   ```
 
-**包含**:
-- **CLAUDE.md** - 主配置文件
-- **CONTEXT_MANAGER.md** - 智能上下文管理
-- **rules/core/** - 核心规则（编码、Git、测试）
-- **rules/domain/** - 领域规则（API、前端、安全）
-- **capabilities/** - 能力定义
+3. **查看日志**
+   ```bash
+   ./swarm logs <task-id>
+   # 或使用 /logs <task-id>
+   ```
 
-### 任务类型
+4. **中途干预**
+   ```bash
+   ./swarm steer <task-id>
+   ```
 
-| 类型 | 自动加载规则 | 适用场景 |
-|------|-------------|---------|
-| `api` | API设计、安全、RESTful | 后端API开发 |
-| `frontend` | UI规范、性能、响应式 | 前端开发 |
-| `testing` | 测试策略、覆盖率 | 测试开发 |
-| `security` | 安全审查、加密 | 安全功能 |
-| `coding` | 代码规范、Git、重构 | 通用编码 |
+5. **完成清理**
+   ```bash
+   ./swarm cleanup
+   ```
+
+---
+
+## 🚦 快速开始
+
+### 前提条件
+
+- OpenClaw Gateway 运行中
+- Claude CLI 已安装
+- tmux 已安装
+- (可选) Telegram Bot Token
+
+### 1. 启动 Agent Swarm
+
+```bash
+cd ~/.openclaw/workspace
+
+# 创建工程化 agent
+./swarm spawn-eng
+
+# 按提示输入：
+# - Task ID: my-api-task
+# - Agent Type: codex (或 claude/gemini)
+# - Task Type: api (或 frontend/testing/security/coding)
+# - Description: Build REST API with FastAPI
+```
+
+### 2. 启动可视化 UI
+
+```bash
+cd projects/Star-Office-UI
+./deploy.sh          # 首次运行
+./start.sh           # 启动服务
+./start_sync.sh      # 启动状态同步
+```
+
+### 3. 配置 Telegram (可选)
+
+```bash
+cd ~/.openclaw/workspace/.clawdbot/scripts
+python telegram-main-bot.py
+```
+
+打开 Telegram，搜索 `@ArxchiboSwarm_bot`，发送 `/help`
 
 ---
 
 ## 📚 文档
 
-### 工作空间文档
+### 核心文档
 
-- **[WORKSPACE_REPORT.md](WORKSPACE_REPORT.md)** - 工作空间整理详细报告
-- **[PROJECTS.md](PROJECTS.md)** - 所有项目概览和统计
-- **[MEMORY.md](MEMORY.md)** - 长期记忆和决策记录
-- **[AGENTS.md](AGENTS.md)** - Agent 行为规范
-- **[SOUL.md](SOUL.md)** - 核心价值观和原则
-- **[TOOLS.md](TOOLS.md)** - 工具配置（API keys 等）
+- [PROJECTS.md](PROJECTS.md) - 项目总览
+- [AGENTS.md](AGENTS.md) - Agent 行为规范
+- [MEMORY.md](MEMORY.md) - 系统知识图谱
+- [TOOLS.md](TOOLS.md) - 工具配置
 
 ### Agent Swarm 文档
 
-- **[.clawdbot/README.md](.clawdbot/README.md)** - Agent Swarm 完整指南
-- **[.clawdbot/INTEGRATION.md](.clawdbot/INTEGRATION.md)** - 集成指南
-- **[.clawdbot/QUICK_START_ENGINEERING.md](.clawdbot/QUICK_START_ENGINEERING.md)** - 工程化快速开始
-- **[.clawdbot/SYSTEM_OVERVIEW.md](.clawdbot/SYSTEM_OVERVIEW.md)** - 系统架构总览
-- **[.clawdbot/TELEGRAM_INTEGRATION.md](.clawdbot/TELEGRAM_INTEGRATION.md)** - Telegram Bot 集成
+- [系统概览](.clawdbot/SYSTEM_OVERVIEW.md)
+- [快速开始](.clawdbot/QUICK_START_ENGINEERING.md)
+- [集成指南](.clawdbot/INTEGRATION.md)
+- [Telegram 集成](.clawdbot/TELEGRAM_INTEGRATION.md)
+- [Prompt 模板](.clawdbot/PROMPT_TEMPLATES.md)
 
-### 项目文档
+### Claude Reconstruction 文档
 
-- **[projects/clawproduct-hunt/README.md](projects/clawproduct-hunt/README.md)** - AgentHub 项目文档
-- **[projects/clawproduct-hunt/DEPLOYMENT.md](projects/clawproduct-hunt/DEPLOYMENT.md)** - 部署指南
-- **[projects/clawproduct-hunt/FRONTEND_ENHANCEMENT.md](projects/clawproduct-hunt/FRONTEND_ENHANCEMENT.md)** - 前端增强报告
-- **[projects/clawproduct-hunt/OPTIMIZATION_REPORT.md](projects/clawproduct-hunt/OPTIMIZATION_REPORT.md)** - 架构优化报告
+- [主文档](claude-Reconstruction/README.md)
+- [Context Manager](claude-Reconstruction/CONTEXT_MANAGER.md)
+- [快速开始](claude-Reconstruction/QUICK_START.md)
 
 ---
 
-## 🚀 快速开始
+## 🛠️ 常用命令
 
-### 1. 启动 Agent Swarm
-
-```bash
-# 查看帮助
-cd ~/.openclaw/workspace
-./swarm help
-
-# 创建工程化 Agent
-./swarm spawn-eng
-```
-
-### 2. 启动 AgentHub
+### Agent 管理
 
 ```bash
-cd projects/clawproduct-hunt
-./setup.sh dev
-# 访问 http://localhost:8000
+# 创建 agent
+./swarm spawn              # 普通 agent
+./swarm spawn-eng          # 工程化 agent
+
+# 监控
+./swarm status             # 查看所有任务
+./swarm logs <id>          # 查看日志
+./swarm attach <id>        # 连接 tmux
+
+# 控制
+./swarm steer <id>         # 中途干预
+./swarm kill <id>          # 终止任务
+./swarm cleanup            # 清理完成任务
 ```
 
-### 3. 启动 Telegram Bot
+### Telegram 命令
+
+```
+/spawn <id> <type> <desc>  - 创建 agent
+/status                     - 查看状态
+/logs <id>                  - 查看日志
+/kill <id>                  - 终止任务
+/cleanup                    - 清理
+/help                       - 帮助
+```
+
+### 可视化 UI
 
 ```bash
-cd .clawdbot/scripts
-./start-telegram-swarm.sh
+# 启动服务
+cd projects/Star-Office-UI
+./start.sh
+
+# 启动状态同步
+./start_sync.sh
+
+# 访问 WebApp
+# https://showtimes-lyric-titanium-sale.trycloudflare.com/debug
 ```
+
+---
+
+## 📈 系统状态
+
+### 完成度
+
+- **Agent Swarm**: 100% ✅
+- **Telegram 集成**: 100% ✅
+- **Star Office UI**: 100% ✅
+- **Claude Reconstruction**: 100% ✅
+- **文档**: 100% ✅
+
+### 测试状态
+
+- ✅ Agent spawn/status/logs/kill
+- ✅ Telegram Bot 所有命令
+- ✅ WebApp 访问和实时更新
+- ✅ Claude Reconstruction 集成
 
 ---
 
 ## 🔒 安全
 
-### .gitignore 保护（95行，6大类）
+### 敏感信息保护
 
-1. **Python 环境** - venv/, *.pyc, __pycache__/
-2. **Node.js** - node_modules/, package-lock.json
-3. **IDE/编辑器** - .vscode/, .idea/, *.swp
-4. **操作系统** - .DS_Store, Thumbs.db
-5. **敏感信息** - *.env, .env.*, *.key, *_token.json
-6. **资源文件** - *.mp4, *.mov, *.zip
+- `.github-token` - GitHub Personal Access Token (gitignored)
+- `.clawdbot/config/*.json` - Bot tokens (gitignored)
+- `state.json` - 运行时状态 (gitignored)
 
-### 密钥管理
+### 权限系统
 
-- ✅ GitHub Token 保存在 `.github-token` (不提交)
-- ✅ Telegram Bot Token 在 `.clawdbot/config/` (不提交)
-- ✅ API Keys 在 `~/.bashrc` 或环境变量
-- ✅ 所有密钥路径已加入 .gitignore
-
----
-
-## 📊 工作空间统计
-
-### 总览
-
-- **总大小**: ~878 MB
-- **子项目数**: 4 个（2活跃 + 2归档）
-- **文档数**: 20+ 份
-- **脚本数**: 30+ 个
-- **Agent Swarm 配置**: 完整
-
-### 技术栈分布
-
-| 技术栈 | 项目数 | 主要项目 |
-|--------|--------|---------|
-| Python + FastAPI | 2 | clawproduct-hunt, agenthub |
-| JavaScript/Node.js | 2 | clawproduct-hunt前端, demo-video |
-| Bash Scripts | 多个 | Agent Swarm, 部署脚本 |
-| Markdown 文档 | 20+ | 各类文档 |
-
----
-
-## 🎯 最佳实践
-
-### 新建项目时
-
-1. **评估是否需要 Agent** - 检查决策树
-2. **选择正确的 Agent 类型**:
-   - 后端/复杂逻辑 → codex
-   - 前端/快速迭代 → claude
-   - UI设计/创意 → gemini
-3. **使用工程化模式**: `./swarm spawn-eng`
-4. **写详细的 prompt**: 文件列表、约束、测试要求
-5. **定期清理**: `./swarm cleanup`
-
-### 管理工作空间
-
-1. **定期整理**: 使用提供的脚本
-2. **文档先行**: 每个项目都有 README
-3. **Git 提交规范**: 使用语义化提交信息
-4. **安全第一**: 不提交密钥和大文件
-
----
-
-## 🤝 贡献
-
-欢迎 PR 和 Issue！
-
-### 贡献指南
-
-1. Fork 本仓库
-2. 创建功能分支
-3. 提交更改（遵循提交规范）
-4. 推送到分支
-5. 打开 Pull Request
-
----
-
-## 📄 许可证
-
-MIT License - 详见 [LICENSE](LICENSE)
+Telegram Bot 授权：
+- **用户ID**: 7744442092, 8573919212
+- **群组ID**: 7744442092 (私聊), -1003731869348
 
 ---
 
 ## 📞 联系方式
 
-- **作者**: Arxchibobo
-- **GitHub**: [openclaw-arxchibo](https://github.com/Arxchibobo/openclaw-arxchibo)
-- **项目主页**: [OpenClaw Agent Swarm](https://github.com/Arxchibobo/openclaw-arxchibo)
+- **GitHub**: [@Arxchibobo](https://github.com/Arxchibobo)
+- **项目**: [openclaw-arxchibo](https://github.com/Arxchibobo/openclaw-arxchibo)
+- **Telegram**: @ArxchiboSwarm_bot
 
 ---
 
-## 📈 版本历史
+## 📄 License
 
-### v2.0.0 (2026-02-26) - 工作空间重组 ✅
-- 🏗️ 完整的目录结构重组
-- 📁 项目集中管理（projects/）
-- 📚 文档归档和完善
-- 🔒 安全加固（.gitignore 95行）
-- 📊 完整的统计和报告
-- ✨ Agent Swarm 系统优化
-
-### v1.0.0 (2026-02-25) - 初始发布
-- 🎉 Agent Swarm 系统部署
-- 🤖 Claude Reconstruction 集成
-- 📱 Telegram Bot 集成
+MIT License - 详见 [LICENSE](LICENSE)
 
 ---
 
-**工作空间版本**: v2.0.0  
-**组织状态**: ✅ **Organized & Optimized**  
-**质量评级**: ⭐⭐⭐⭐⭐ (5/5)  
-**最后更新**: 2026-02-26
+## 🙏 致谢
+
+- [OpenClaw](https://openclaw.ai) - 核心框架
+- [Claude](https://claude.ai) - AI 助手
+- Elvis Sun - Agent Swarm 架构灵感
 
 ---
 
-⭐ **如果这个工作空间对你有帮助，请给我们一个 Star！** ⭐
+**最后更新**: 2026-02-26  
+**版本**: v2.1.0  
+**状态**: Production Ready  
+**完成度**: 100%
