@@ -4,6 +4,21 @@
 
 > 基于 [ringhyacinth/Star-Office-UI](https://github.com/ringhyacinth/Star-Office-UI) 深度定制
 
+## 📱 效果展示
+
+### Telegram 中的实时办公室
+
+![Telegram Demo](screenshots/telegram-demo.jpg)
+
+**特点：**
+- 🏢 完整的像素办公室场景（AI 生成）
+- 🦞 可爱的龙虾角色（282px，醒目可见）
+- 💬 实时状态显示（中文）
+- ⭐ 底部"Bobo的办公室"金色牌匾
+- 🎮 流畅的游戏动画（走动、眨眼、气泡）
+
+---
+
 ## 🎯 核心特性
 
 ### 📱 Telegram WebApp 深度集成
